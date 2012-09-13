@@ -7,6 +7,10 @@ role File::Spec::Unix {
 		'.'
 	}
 
+	method devnull { '/dev/null' }
+
+	method rootdir { '/' }
+
 	my $tmpdir;
 	method _tmpdir( *@dirlist ) {
 		return $tmpdir if $tmpdir.defined;
@@ -23,6 +27,8 @@ role File::Spec::Unix {
 		return $tmpdir if $tmpdir.defined;
 		$tmpdir = self._tmpdir( %*ENV{'TMPDIR'}, '/tmp' );
 	}
+
+	method updir { '..' }
 }
 
 role File::Spec::OS {
