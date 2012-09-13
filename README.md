@@ -8,22 +8,22 @@ Usage:
 
 Methods (current state):
 
-                       Unix   Mac   OS2  Win32  VMS
-canonpath
-catdir
-catfile
-curdir                 done  done        done      
-devnull
-rootdir
-tmpdir                 done  done        done      
-updir
-no_upwards
-case_tolerant
-file_name_is_absolute
-path
-join
-splitpath
-splitdir
-catpath
-abs2rel
-rel2abs
+	                       Unix   Mac   OS2  Win32  VMS
+	canonpath
+	catdir
+	catfile
+	curdir                 done  done        done      
+	devnull
+	rootdir
+	tmpdir                 done  done        done      
+	updir
+	no_upwards
+	case_tolerant
+	file_name_is_absolute
+	path
+	join
+	splitpath
+	splitdir
+	catpath
+	abs2rel
+	rel2abs
