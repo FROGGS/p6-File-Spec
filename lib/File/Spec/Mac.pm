@@ -8,9 +8,15 @@ role File::Spec::OS {
 	also does File::Spec::Unix;
 
 	# and add Mac specific stuff
-	#method curdir {
-	#	'3'
-	#}
+	method curdir {
+		':'
+	}
+
+	my $tmpdir;
+	method tmpdir {
+		return $tmpdir if $tmpdir.defined;
+		$tmpdir = self._tmpdir( %*ENV{'TMPDIR'} );
+	}
 }
 
 1;
