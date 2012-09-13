@@ -16,7 +16,7 @@ else {
 	is File::Spec.devnull, '/dev/null', 'devnull is /dev/null';
 	is File::Spec.rootdir, '/',         'rootdir is "/"';
 	#tmpdir
-	is File::Spec.updir,   '..',        'rootdir is ".."';
+	is File::Spec.updir,   '..',        'updir is ".."';
 	#no_upwards
 	#case_tolerant
 	#file_name_is_absolute
