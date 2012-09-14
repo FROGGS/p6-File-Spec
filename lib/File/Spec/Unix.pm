@@ -54,7 +54,7 @@ class File::Spec::Unix {
 			last;
 		}
 		$tmpdir = self.curdir unless $tmpdir.defined;
-		#$tmpdir = $tmpdir.defined && self.canonpath( $tmpdir );
+		$tmpdir = $tmpdir.defined && self.canonpath( $tmpdir );
 		return $tmpdir;
 	}
 	method tmpdir {
@@ -64,8 +64,9 @@ class File::Spec::Unix {
 
 	method updir { '..' }
 
-	method no_upwards {
-		
+	method no_upwards( @paths ) {
+		my @no_upwards = grep { $_ !~~ /^[\.|\.\.]$/ }, @paths;
+		return @no_upwards;
 	}
 
 	method case_tolerant {

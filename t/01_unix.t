@@ -43,9 +43,14 @@ else {
 	is File::Spec.curdir,  '.',         'curdir is "."';
 	is File::Spec.devnull, '/dev/null', 'devnull is /dev/null';
 	is File::Spec.rootdir, '/',         'rootdir is "/"';
+
 	#tmpdir
+
 	is File::Spec.updir,   '..',        'updir is ".."';
-	#no_upwards
+	my @get  = <. .. .git blib lib t>;
+	my @want = <.git blib lib t>;
+	is_deeply File::Spec.no_upwards( @get ), @want, 'no_upwards: (. .. .git blib lib t) -> (.git blib lib t)';
+
 	#case_tolerant
 	#file_name_is_absolute
 	#path

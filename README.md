@@ -17,7 +17,7 @@ Methods (current state):
 	rootdir                done              done      
 	tmpdir                 done  done        done      
 	updir                  done  done        done      
-	no_upwards
+	no_upwards             done                        
 	case_tolerant
 	file_name_is_absolute
 	path

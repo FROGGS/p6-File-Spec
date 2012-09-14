@@ -26,7 +26,7 @@ class File::Spec {
 	method rootdir               { ::($module).rootdir()               }
 	method tmpdir                { ::($module).tmpdir()                }
 	method updir                 { ::($module).updir()                 }
-	method no_upwards            { ::($module).no_upwards()            }
+	method no_upwards( *@paths ) { ::($module).no_upwards( @paths )    }
 	method case_tolerant         { ::($module).case_tolerant()         }
 	method file_name_is_absolute { ::($module).file_name_is_absolute() }
 	method path                  { ::($module).path()                  }
