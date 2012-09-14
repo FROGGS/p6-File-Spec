@@ -9,7 +9,7 @@ Usage:
 Methods (current state):
 
 	                       Unix   Mac   OS2  Win32  VMS
-	canonpath
+	canonpath              done                        
 	catdir
 	catfile
 	curdir                 done  done        done      

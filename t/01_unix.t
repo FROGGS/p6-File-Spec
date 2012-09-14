@@ -3,13 +3,29 @@ use lib 'lib';
 use Test;
 use File::Spec;
 
-plan 4;
+plan 14;
 
 if $*OS ~~ any(<MacOS MSWin32 os2 VMS epoc NetWare symbian dos cygwin>) {
 	skip_rest 'this is not Unix\'ish'
 }
 else {
 	#canonpath
+	my %canonpath = (
+		'///../../..//./././a//b/.././c/././' => '/a/b/../c',
+		''                                    => '',
+		'a/../../b/c'                         => 'a/../../b/c',
+		'/.'                                  => '/',
+		'/./'                                 => '/',
+		'/a/./'                               => '/a',
+		'/a/.'                                => '/a',
+		'/../../'                             => '/',
+		'/../..'                              => '/',
+		'/..'                                 => '/',
+	);
+	for %canonpath.kv -> $get, $want {
+		is File::Spec.canonpath( $get ), $want, "canonpath: '$get' -> '$want'";
+	}
+
 	#catdir
 	#catfile
 	is File::Spec.curdir,  '.',         'curdir is "."';

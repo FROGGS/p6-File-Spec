@@ -18,7 +18,7 @@ my $module = "File::Spec::" ~ ($module{$*OS} // 'Unix');
 require $module;
 
 class File::Spec {
-	method canonpath             { ::($module).canonpath()             }
+	method canonpath( $path )    { ::($module).canonpath( $path )      }
 	method catdir                { ::($module).catdir()                }
 	method catfile               { ::($module).catfile()               }
 	method curdir                { ::($module).curdir()                }

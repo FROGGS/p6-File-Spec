@@ -2,8 +2,29 @@
 module File::Spec::Unix;
 
 class File::Spec::Unix {
-	method canonpath {
-		
+	method canonpath( $path is copy ) {
+		return unless $path.defined;
+
+		# Handle POSIX-style node names beginning with double slash (qnx, nto)
+		# (POSIX says: "a pathname that begins with two successive slashes
+		# may be interpreted in an implementation-defined manner, although
+		# more than two leading slashes shall be treated as a single slash.")
+		my $node = '';
+		my $double_slashes_special = $*OS eq 'qnx' || $*OS eq 'nto';
+
+
+		if $double_slashes_special
+		&& ( $path ~~ s[^(\/\/<-[\/]>+)\/?$] = '' || $path ~~ s[^(\/\/<-[\/]>+)\/] = '/' ) {
+			$node = $0;
+		}
+
+		$path ~~ s:g[\/+]            = '/';                     # xx////xx  -> xx/xx
+		$path ~~ s:g[[\/\.]+[\/|$]] = '/';                     # xx/././xx -> xx/xx
+		$path ~~ s[^[\.\/]+]         = '' unless $path eq "./"; # ./xx      -> xx
+		$path ~~ s[^\/[\.\.\/]+]     = '/';                     # /../../xx -> xx
+		$path ~~ s[^\/\.\.$]         = '/';                     # /..       -> /
+		$path ~~ s[\/$]              = '' unless $path eq "/";  # xx/       -> xx
+		return "$node$path";
 	}
 
 	method catdir {
