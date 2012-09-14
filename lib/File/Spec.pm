@@ -1,26 +1,41 @@
 
 module File::Spec;
 
-BEGIN {
-	my %module = (
-		'MacOS'   => 'Mac',
-		'MSWin32' => 'Win32',
-		'os2'     => 'OS2',
-		'VMS'     => 'VMS',
-		'epoc'    => 'Epoc',
-		'NetWare' => 'Win32', # Yes, File::Spec::Win32 works on NetWare.
-		'symbian' => 'Win32', # Yes, File::Spec::Win32 works on symbian.
-		'dos'     => 'OS2',   # Yes, File::Spec::OS2 works on DJGPP.
-		'cygwin'  => 'Cygwin'
-	);
+my %module = (
+	'MacOS'   => 'Mac',
+	'MSWin32' => 'Win32',
+	'os2'     => 'OS2',
+	'VMS'     => 'VMS',
+	'epoc'    => 'Epoc',
+	'NetWare' => 'Win32', # Yes, File::Spec::Win32 works on NetWare.
+	'symbian' => 'Win32', # Yes, File::Spec::Win32 works on symbian.
+	'dos'     => 'OS2',   # Yes, File::Spec::OS2 works on DJGPP.
+	'cygwin'  => 'Cygwin'
+);
 
-	my $module = $module{$*OS} // 'Unix';
+my $module = "File::Spec::" ~ ($module{$*OS} // 'Unix');
 
-	require "File::Spec::$module";
-};
+require $module;
 
 class File::Spec {
-	also does File::Spec::OS;
+	method canonpath             { ::($module).canonpath()             }
+	method catdir                { ::($module).catdir()                }
+	method catfile               { ::($module).catfile()               }
+	method curdir                { ::($module).curdir()                }
+	method devnull               { ::($module).devnull()               }
+	method rootdir               { ::($module).rootdir()               }
+	method tmpdir                { ::($module).tmpdir()                }
+	method updir                 { ::($module).updir()                 }
+	method no_upwards            { ::($module).no_upwards()            }
+	method case_tolerant         { ::($module).case_tolerant()         }
+	method file_name_is_absolute { ::($module).file_name_is_absolute() }
+	method path                  { ::($module).path()                  }
+	method join                  { ::($module).join()                  }
+	method splitpath             { ::($module).splitpath()             }
+	method splitdir              { ::($module).splitdir()              }
+	method catpath               { ::($module).catpath()               }
+	method abs2rel               { ::($module).abs2rel()               }
+	method rel2ab                { ::($module).rel2ab()                }
 }
 
 1;
