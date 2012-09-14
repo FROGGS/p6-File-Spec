@@ -19,7 +19,7 @@ require $module;
 
 class File::Spec {
 	method canonpath( $path )    { ::($module).canonpath( $path )      }
-	method catdir                { ::($module).catdir()                }
+	method catdir( *@parts )     { ::($module).catdir( @parts )        }
 	method catfile               { ::($module).catfile()               }
 	method curdir                { ::($module).curdir()                }
 	method devnull               { ::($module).devnull()               }

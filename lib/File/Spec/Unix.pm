@@ -27,9 +27,7 @@ class File::Spec::Unix {
 		return "$node$path";
 	}
 
-	method catdir {
-		
-	}
+	method catdir( @parts ) { self.canonpath( (@parts, '').join('/') ) }
 
 	method catfile {
 		

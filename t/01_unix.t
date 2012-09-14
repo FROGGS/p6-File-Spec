@@ -9,7 +9,6 @@ if $*OS ~~ any(<MacOS MSWin32 os2 VMS epoc NetWare symbian dos cygwin>) {
 	skip_rest 'this is not Unix\'ish'
 }
 else {
-	#canonpath
 	my %canonpath = (
 		'///../../..//./././a//b/.././c/././' => '/a/b/../c',
 		''                                    => '',
@@ -26,7 +25,15 @@ else {
 		is File::Spec.canonpath( $get ), $want, "canonpath: '$get' -> '$want'";
 	}
 
-	#catdir
+	is File::Spec.catdir( ),                      '',          "catdir: no arg -> ''";
+	is File::Spec.catdir( '' ),                   '/',         "catdir: '' -> '/'";
+	is File::Spec.catdir( '/' ),                  '/',         "catdir: '/' -> '/'";
+	is File::Spec.catdir( '','d1','d2','d3','' ), '/d1/d2/d3', "catdir: ('','d1','d2','d3','') -> '/d1/d2/d3'";
+	is File::Spec.catdir( 'd1','d2','d3','' ),    'd1/d2/d3',  "catdir: ('d1','d2','d3','') -> 'd1/d2/d3'";
+	is File::Spec.catdir( '','d1','d2','d3' ),    '/d1/d2/d3', "catdir: ('','d1','d2','d3') -> '/d1/d2/d3'";
+	is File::Spec.catdir( 'd1','d2','d3' ),       'd1/d2/d3',  "catdir: ('d1','d2','d3') -> 'd1/d2/d3'";
+	is File::Spec.catdir( '/','d2/d3' ),          '/d2/d3',    "catdir: ('/','d2/d3') -> '/d2/d3'";
+
 	#catfile
 	is File::Spec.curdir,  '.',         'curdir is "."';
 	is File::Spec.devnull, '/dev/null', 'devnull is /dev/null';
