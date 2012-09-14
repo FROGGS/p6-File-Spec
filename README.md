@@ -21,7 +21,7 @@ Methods (current state):
 	case_tolerant          done  done  done  done  done        done
 	file_name_is_absolute  done                                    
 	path                   done                                    
-	join
+	join                   done                                    
 	splitpath
 	splitdir
 	catpath
