@@ -84,8 +84,8 @@ class File::Spec::Unix {
 		return @path
 	}
 
-	method join {
-		
+	method join( @parts ) {
+		self.catfile( @parts )
 	}
 
 	method splitpath {

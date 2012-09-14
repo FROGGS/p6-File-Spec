@@ -30,7 +30,7 @@ class File::Spec {
 	method case_tolerant                  { ::($module).case_tolerant()                }
 	method file_name_is_absolute( $file ) { ::($module).file_name_is_absolute( $file ) }
 	method path                           { ::($module).path()                         }
-	method join                           { ::($module).join()                         }
+	method join( *@parts )                { ::($module).join( @parts )                 }
 	method splitpath                      { ::($module).splitpath()                    }
 	method splitdir                       { ::($module).splitdir()                     }
 	method catpath                        { ::($module).catpath()                      }

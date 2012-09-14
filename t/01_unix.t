@@ -3,7 +3,7 @@ use lib 'lib';
 use Test;
 use File::Spec;
 
-plan 32;
+plan 37;
 
 if $*OS ~~ any(<MacOS MSWin32 os2 VMS epoc NetWare symbian dos cygwin>) {
 	skip_rest 'this is not Unix\'ish'
@@ -62,7 +62,12 @@ else {
 	is_deeply File::Spec.path, @want, 'path';
 	%*ENV{'PATH'} = $path;
 
-	#join
+	is File::Spec.join('a','b','c'),   'a/b/c', "join: ('a','b','c') -> 'a/b/c'";
+	is File::Spec.join('a','b','./c'), 'a/b/c', "join: ('a','b','./c') -> 'a/b/c'";
+	is File::Spec.join('./a','b','c'), 'a/b/c', "join: ('./a','b','c') -> 'a/b/c'";
+	is File::Spec.join('c'),           'c',     "join: 'c' -> 'c'";
+	is File::Spec.join('./c'),         'c',     "join: './c' -> 'c'";
+
 	#splitpath
 	#splitdir
 	#catpath
