@@ -25,5 +25,5 @@ Methods (current state):
 	splitpath              done                                    
 	splitdir               done                                    
 	catpath                done                                    
-	abs2rel
-	rel2abs
+	abs2rel                done                                    
+	rel2abs                done                                    

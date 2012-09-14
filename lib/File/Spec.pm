@@ -34,8 +34,8 @@ class File::Spec {
 	method splitpath( $path, $no_file = 0 )     { ::($module).splitpath( $path, $no_file )         }
 	method splitdir( $path )                    { ::($module).splitdir( $path )                    }
 	method catpath( $volume, $directoy, $file ) { ::($module).catpath( $volume, $directoy, $file ) }
-	method abs2rel                              { ::($module).abs2rel()                            }
-	method rel2abs                              { ::($module).rel2abs()                            }
+	method abs2rel( $path, $base = Str )        { ::($module).abs2rel( $path, $base )              }
+	method rel2abs( $path, $base = Str )        { ::($module).rel2abs( $path, $base )              }
 }
 
 1;

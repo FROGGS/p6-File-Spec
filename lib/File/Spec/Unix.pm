@@ -27,9 +27,9 @@ class File::Spec::Unix {
 		return "$node$path";
 	}
 
-	method catdir( @parts ) { self.canonpath( (@parts, '').join('/') ) }
+	method catdir( *@parts ) { self.canonpath( (@parts, '').join('/') ) }
 
-	method catfile( @parts is copy ) {
+	method catfile( *@parts is copy ) {
 		my $file = self.canonpath( @parts.pop );
 		return $file unless @parts.elems;
 		my $dir  = self.catdir( @parts );
@@ -64,7 +64,7 @@ class File::Spec::Unix {
 
 	method updir { '..' }
 
-	method no_upwards( @paths ) {
+	method no_upwards( *@paths ) {
 		my @no_upwards = grep { $_ !~~ /^[\.|\.\.]$/ }, @paths;
 		return @no_upwards;
 	}
@@ -84,7 +84,7 @@ class File::Spec::Unix {
 		return @path
 	}
 
-	method join( @parts ) {
+	method join( *@parts ) {
 		self.catfile( @parts )
 	}
 
@@ -121,12 +121,75 @@ class File::Spec::Unix {
 		return $directory
 	}
 
-	method abs2rel {
-		
+	method abs2rel( $path is copy, $base is copy = Str ) {
+		$base = $*CWD unless $base.defined && $base.chars;
+
+		$path = self.canonpath( $path );
+		$base = self.canonpath( $base );
+
+		if self.file_name_is_absolute($path) || self.file_name_is_absolute($base) {
+			$path = self.rel2abs( $path );
+			$base = self.rel2abs( $base );
+		}
+		else {
+			# save a couple of cwd()s if both paths are relative
+			$path = self.catdir( '/', $path );
+			$base = self.catdir( '/', $base );
+		}
+
+		my ($path_volume, $path_directories) = self.splitpath( $path, 1 );
+		my ($base_volume, $base_directories) = self.splitpath( $base, 1 );
+
+		# Can't relativize across volumes
+		return $path unless $path_volume eq $base_volume;
+
+		# For UNC paths, the user might give a volume like //foo/bar that
+		# strictly speaking has no directory portion.  Treat it as if it
+		# had the root directory for that volume.
+		if !$base_directories.chars && self.file_name_is_absolute( $base ) {
+			$base_directories = self.rootdir;
+		}
+
+		# Now, remove all leading components that are the same
+		my @pathchunks = self.splitdir( $path_directories );
+		my @basechunks = self.splitdir( $base_directories );
+
+		if $base_directories eq self.rootdir {
+			@pathchunks.shift;
+			return self.canonpath( self.catpath('', self.catdir( @pathchunks ), '') );
+		}
+
+		while @pathchunks && @basechunks && @pathchunks[0] eq @basechunks[0] {
+			@pathchunks.shift;
+			@basechunks.shift;
+		}
+		return self.curdir unless @pathchunks || @basechunks;
+
+		# $base now contains the directories the resulting relative path 
+		# must ascend out of before it can descend to $path_directory.
+		my $result_dirs = self.catdir( self.updir() xx @basechunks.elems, @pathchunks );
+		return self.canonpath( self.catpath('', $result_dirs, '') );
 	}
 
-	method rel2abs {
-		
+	method rel2abs( $path is copy, $base is copy = Str ) {
+		# Clean up $path
+		if !self.file_name_is_absolute( $path ) {
+			# Figure out the effective $base and clean it up.
+			if !$base.defined || $base eq '' {
+				$base = $*CWD;
+			}
+			elsif !self.file_name_is_absolute( $base ) {
+				$base = self.rel2abs( $base )
+			}
+			else {
+				$base = self.canonpath( $base )
+			}
+
+			# Glom them together
+			$path = self.catdir( $base, $path )
+		}
+
+		return self.canonpath( $path )
 	}
 }
 
