@@ -3,7 +3,7 @@ use lib 'lib';
 use Test;
 use File::Spec;
 
-plan 27;
+plan 31;
 
 if $*OS ~~ any(<MacOS MSWin32 os2 VMS epoc NetWare symbian dos cygwin>) {
 	skip_rest 'this is not Unix\'ish'
@@ -53,7 +53,9 @@ else {
 
 	is File::Spec.case_tolerant, 0, 'case_tolerant is 0';
 
-	#file_name_is_absolute
+	ok  File::Spec.file_name_is_absolute( '/abcd' ), 'file_name_is_absolute: ok "/abcd"';
+	nok File::Spec.file_name_is_absolute( 'abcd' ),  'file_name_is_absolute: nok "abcd"';
+
 	#path
 	#join
 	#splitpath

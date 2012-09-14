@@ -71,8 +71,8 @@ class File::Spec::Unix {
 
 	method case_tolerant { 0 }
 
-	method file_name_is_absolute {
-		
+	method file_name_is_absolute( $file ) {
+		$file ~~ m/^\//
 	}
 
 	method path {
