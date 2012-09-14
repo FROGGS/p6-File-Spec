@@ -23,7 +23,7 @@ Methods (current state):
 	path                   done                                    
 	join                   done                                    
 	splitpath              done                                    
-	splitdir
+	splitdir               done                                    
 	catpath
 	abs2rel
 	rel2abs

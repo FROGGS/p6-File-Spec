@@ -103,8 +103,8 @@ class File::Spec::Unix {
 		return ( $volume, $directory, $file );
 	}
 
-	method splitdir {
-		
+	method splitdir( $path ) {
+		return $path.split( /\// )
 	}
 
 	method catpath {
