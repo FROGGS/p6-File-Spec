@@ -29,7 +29,7 @@ class File::Spec::Win32 {
 
 	method updir                 { ::($module).updir()                 }
 	method no_upwards            { ::($module).no_upwards()            }
-	method case_tolerant         { ::($module).case_tolerant()         }
+	method case_tolerant         { 1                                   }
 	method file_name_is_absolute { ::($module).file_name_is_absolute() }
 	method path                  { ::($module).path()                  }
 	method join                  { ::($module).join()                  }

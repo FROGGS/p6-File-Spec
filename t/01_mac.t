@@ -18,7 +18,9 @@ else {
 	#tmpdir
 	is File::Spec.updir,   '::',       'updir is "::"';
 	#no_upwards
-	#case_tolerant
+
+	is File::Spec.case_tolerant, 1, 'case_tolerant is 0';
+
 	#file_name_is_absolute
 	#path
 	#join

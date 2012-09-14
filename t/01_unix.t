@@ -51,7 +51,8 @@ else {
 	my @want = <.git blib lib t>;
 	is_deeply File::Spec.no_upwards( @get ), @want, 'no_upwards: (. .. .git blib lib t) -> (.git blib lib t)';
 
-	#case_tolerant
+	is File::Spec.case_tolerant, 0, 'case_tolerant is 0';
+
 	#file_name_is_absolute
 	#path
 	#join

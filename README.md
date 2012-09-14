@@ -8,8 +8,8 @@ Usage:
 
 Methods (current state):
 
-	                       Unix   Mac   OS2  Win32  VMS
-	canonpath              done                        
+	                       Unix   Mac   OS2  Win32  VMS Cygwin Epoc
+	canonpath              done                                    
 	catdir                 done                        
 	catfile                done                        
 	curdir                 done  done        done      
@@ -18,7 +18,7 @@ Methods (current state):
 	tmpdir                 done  done        done      
 	updir                  done  done        done      
 	no_upwards             done                        
-	case_tolerant
+	case_tolerant          done  done  done  done  done        done
 	file_name_is_absolute
 	path
 	join

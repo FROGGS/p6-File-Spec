@@ -10,6 +10,9 @@ if $*OS !~~ 'os2' {
 }
 else {
 	is File::Spec.curdir, '.', 'curdir is "."';
+
+	is File::Spec.case_tolerant, 1, 'case_tolerant is 0';
+
 }
 
 done;

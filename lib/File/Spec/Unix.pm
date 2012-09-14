@@ -69,9 +69,7 @@ class File::Spec::Unix {
 		return @no_upwards;
 	}
 
-	method case_tolerant {
-		
-	}
+	method case_tolerant { 0 }
 
 	method file_name_is_absolute {
 		
