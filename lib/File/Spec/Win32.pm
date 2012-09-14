@@ -9,8 +9,8 @@ class File::Spec::Win32 {
 	method catdir                { ::($module).catdir()                }
 	method catfile               { ::($module).catfile()               }
 	method curdir                { ::($module).curdir()                }
-	method devnull               { ::($module).devnull()               }
-	method rootdir               { ::($module).rootdir()               }
+	method devnull               { 'nul'                               }
+	method rootdir               { '\\'                                }
 
 	my $tmpdir;
 	method tmpdir {
@@ -37,7 +37,7 @@ class File::Spec::Win32 {
 	method splitdir              { ::($module).splitdir()              }
 	method catpath               { ::($module).catpath()               }
 	method abs2rel               { ::($module).abs2rel()               }
-	method rel2ab                { ::($module).rel2ab()                }
+	method rel2abs               { ::($module).rel2abs()               }
 }
 
 1;

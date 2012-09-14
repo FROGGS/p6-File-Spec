@@ -22,7 +22,7 @@ class File::Spec::Cygwin {
 	method splitdir              { ::($module).splitdir()              }
 	method catpath               { ::($module).catpath()               }
 	method abs2rel               { ::($module).abs2rel()               }
-	method rel2ab                { ::($module).rel2ab()                }
+	method rel2abs               { ::($module).rel2abs()               }
 }
 
 1;

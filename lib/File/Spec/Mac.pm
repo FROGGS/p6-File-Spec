@@ -8,12 +8,8 @@ class File::Spec::Mac {
 	method canonpath             { ::($module).canonpath()             }
 	method catdir                { ::($module).catdir()                }
 	method catfile               { ::($module).catfile()               }
-
-	method curdir {
-		':'
-	}
-
-	method devnull               { ::($module).devnull()               }
+	method curdir                { ':'                                 }
+	method devnull               { 'Dev:Null'                          }
 	method rootdir               { ::($module).rootdir()               }
 
 	my $tmpdir;
@@ -22,7 +18,7 @@ class File::Spec::Mac {
 		$tmpdir = self._tmpdir( %*ENV{'TMPDIR'} );
 	}
 
-	method updir                 { ::($module).updir()                 }
+	method updir                 { '::'                                }
 	method no_upwards            { ::($module).no_upwards()            }
 	method case_tolerant         { ::($module).case_tolerant()         }
 	method file_name_is_absolute { ::($module).file_name_is_absolute() }
@@ -32,7 +28,7 @@ class File::Spec::Mac {
 	method splitdir              { ::($module).splitdir()              }
 	method catpath               { ::($module).catpath()               }
 	method abs2rel               { ::($module).abs2rel()               }
-	method rel2ab                { ::($module).rel2ab()                }
+	method rel2abs               { ::($module).rel2abs()               }
 }
 
 1;
