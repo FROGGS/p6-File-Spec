@@ -1,7 +1,9 @@
 
 module File::Spec::Unix;
 
-class File::Spec::Unix {
+use File::Spec::Guts;
+
+class File::Spec::Unix does File::Spec::Guts {
 	method curdir {
 		'.'
 	}

@@ -3,6 +3,8 @@ use lib 'lib';
 use Test;
 use File::Spec;
 
+File::Spec.new;
+
 plan 4;
 
 if $*OS ~~ any(<MacOS MSWin32 os2 VMS epoc NetWare symbian dos cygwin>) {
