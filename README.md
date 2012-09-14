@@ -13,10 +13,10 @@ Methods (current state):
 	catdir
 	catfile
 	curdir                 done  done        done      
-	devnull                done
-	rootdir                done
+	devnull                done  done        done      
+	rootdir                done              done      
 	tmpdir                 done  done        done      
-	updir                  done
+	updir                  done  done        done      
 	no_upwards
 	case_tolerant
 	file_name_is_absolute
