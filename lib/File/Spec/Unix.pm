@@ -107,8 +107,18 @@ class File::Spec::Unix {
 		return $path.split( /\// )
 	}
 
-	method catpath {
-		
+	method catpath( $volume, $directory is copy, $file ) {
+		if $directory               ne ''
+		&& $file                    ne ''
+		&& $directory.substr( *-1 ) ne '/'
+		&& $file.substr( 0, 1 )     ne '/' {
+			$directory ~= "/$file"
+		}
+		else {
+			$directory ~= $file
+		}
+
+		return $directory
 	}
 
 	method abs2rel {
