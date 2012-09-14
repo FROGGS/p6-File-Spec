@@ -12,5 +12,5 @@ _can_ok $_ for <canonpath catdir catfile curdir devnull rootdir tmpdir
                 join splitpath splitdir catpath abs2rel rel2abs>;
 
 sub _can_ok( $method ) {
-	ok File::Spec.^methods.grep( $method ), "we can call File::Spec.$method"
+	ok File::Spec.^methods.first( $method ), "we can call File::Spec.$method"
 }
