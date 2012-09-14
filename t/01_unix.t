@@ -3,7 +3,7 @@ use lib 'lib';
 use Test;
 use File::Spec;
 
-plan 14;
+plan 27;
 
 if $*OS ~~ any(<MacOS MSWin32 os2 VMS epoc NetWare symbian dos cygwin>) {
 	skip_rest 'this is not Unix\'ish'
@@ -34,7 +34,12 @@ else {
 	is File::Spec.catdir( 'd1','d2','d3' ),       'd1/d2/d3',  "catdir: ('d1','d2','d3') -> 'd1/d2/d3'";
 	is File::Spec.catdir( '/','d2/d3' ),          '/d2/d3',    "catdir: ('/','d2/d3') -> '/d2/d3'";
 
-	#catfile
+	is File::Spec.catfile('a','b','c'),   'a/b/c', "catfile: ('a','b','c') -> 'a/b/c'";
+	is File::Spec.catfile('a','b','./c'), 'a/b/c', "catfile: ('a','b','./c') -> 'a/b/c'";
+	is File::Spec.catfile('./a','b','c'), 'a/b/c', "catfile: ('./a','b','c') -> 'a/b/c'";
+	is File::Spec.catfile('c'),           'c',     "catfile: 'c' -> 'c'";
+	is File::Spec.catfile('./c'),         'c',     "catfile: './c' -> 'c'";
+
 	is File::Spec.curdir,  '.',         'curdir is "."';
 	is File::Spec.devnull, '/dev/null', 'devnull is /dev/null';
 	is File::Spec.rootdir, '/',         'rootdir is "/"';

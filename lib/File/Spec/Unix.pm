@@ -29,8 +29,12 @@ class File::Spec::Unix {
 
 	method catdir( @parts ) { self.canonpath( (@parts, '').join('/') ) }
 
-	method catfile {
-		
+	method catfile( @parts is copy ) {
+		my $file = self.canonpath( @parts.pop );
+		return $file unless @parts.elems;
+		my $dir  = self.catdir( @parts );
+		$dir    ~= '/' unless $dir.substr(*-1) eq '/';
+		return $dir ~ $file;
 	}
 
 	method curdir {

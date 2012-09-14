@@ -11,7 +11,7 @@ Methods (current state):
 	                       Unix   Mac   OS2  Win32  VMS
 	canonpath              done                        
 	catdir                 done                        
-	catfile
+	catfile                done                        
 	curdir                 done  done        done      
 	devnull                done  done        done      
 	rootdir                done              done      
