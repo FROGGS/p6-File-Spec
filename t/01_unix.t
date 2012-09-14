@@ -3,7 +3,7 @@ use lib 'lib';
 use Test;
 use File::Spec;
 
-plan 31;
+plan 32;
 
 if $*OS ~~ any(<MacOS MSWin32 os2 VMS epoc NetWare symbian dos cygwin>) {
 	skip_rest 'this is not Unix\'ish'
@@ -56,7 +56,12 @@ else {
 	ok  File::Spec.file_name_is_absolute( '/abcd' ), 'file_name_is_absolute: ok "/abcd"';
 	nok File::Spec.file_name_is_absolute( 'abcd' ),  'file_name_is_absolute: nok "abcd"';
 
-	#path
+	my $path = %*ENV{'PATH'};
+	%*ENV{'PATH'} = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:';
+	@want         = </usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin /usr/games .>;
+	is_deeply File::Spec.path, @want, 'path';
+	%*ENV{'PATH'} = $path;
+
 	#join
 	#splitpath
 	#splitdir

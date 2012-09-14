@@ -20,7 +20,7 @@ Methods (current state):
 	no_upwards             done                        
 	case_tolerant          done  done  done  done  done        done
 	file_name_is_absolute  done                                    
-	path
+	path                   done                                    
 	join
 	splitpath
 	splitdir

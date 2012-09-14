@@ -76,7 +76,12 @@ class File::Spec::Unix {
 	}
 
 	method path {
-		
+		return () unless %*ENV{'PATH'};
+		my @path = %*ENV{'PATH'}.split( ':' );
+		for @path {
+			$_ = '.' if $_ eq ''
+		}
+		return @path
 	}
 
 	method join {
