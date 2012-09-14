@@ -22,7 +22,7 @@ Methods (current state):
 	file_name_is_absolute  done                                    
 	path                   done                                    
 	join                   done                                    
-	splitpath
+	splitpath              done                                    
 	splitdir
 	catpath
 	abs2rel

@@ -88,8 +88,19 @@ class File::Spec::Unix {
 		self.catfile( @parts )
 	}
 
-	method splitpath {
-		
+	method splitpath( $path, $nofile ) {
+		my ( $volume, $directory, $file ) = ( '', '', '' );
+
+		if $nofile {
+			$directory = $path;
+		}
+		else {
+			$path      ~~ m/^ ( [ .* \/ [ \.\.?$ ]? ]? ) (<-[\/]>*) /;
+			$directory = $0;
+			$file      = $1;
+		}
+
+		return ( $volume, $directory, $file );
 	}
 
 	method splitdir {

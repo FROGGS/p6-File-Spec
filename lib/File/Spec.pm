@@ -18,24 +18,24 @@ my $module = "File::Spec::" ~ ($module{$*OS} // 'Unix');
 require $module;
 
 class File::Spec {
-	method canonpath( $path )             { ::($module).canonpath( $path )             }
-	method catdir( *@parts )              { ::($module).catdir( @parts )               }
-	method catfile( *@parts )             { ::($module).catfile( @parts )              }
-	method curdir                         { ::($module).curdir()                       }
-	method devnull                        { ::($module).devnull()                      }
-	method rootdir                        { ::($module).rootdir()                      }
-	method tmpdir                         { ::($module).tmpdir()                       }
-	method updir                          { ::($module).updir()                        }
-	method no_upwards( *@paths )          { ::($module).no_upwards( @paths )           }
-	method case_tolerant                  { ::($module).case_tolerant()                }
-	method file_name_is_absolute( $file ) { ::($module).file_name_is_absolute( $file ) }
-	method path                           { ::($module).path()                         }
-	method join( *@parts )                { ::($module).join( @parts )                 }
-	method splitpath                      { ::($module).splitpath()                    }
-	method splitdir                       { ::($module).splitdir()                     }
-	method catpath                        { ::($module).catpath()                      }
-	method abs2rel                        { ::($module).abs2rel()                      }
-	method rel2abs                        { ::($module).rel2abs()                      }
+	method canonpath( $path )               { ::($module).canonpath( $path )             }
+	method catdir( *@parts )                { ::($module).catdir( @parts )               }
+	method catfile( *@parts )               { ::($module).catfile( @parts )              }
+	method curdir                           { ::($module).curdir()                       }
+	method devnull                          { ::($module).devnull()                      }
+	method rootdir                          { ::($module).rootdir()                      }
+	method tmpdir                           { ::($module).tmpdir()                       }
+	method updir                            { ::($module).updir()                        }
+	method no_upwards( *@paths )            { ::($module).no_upwards( @paths )           }
+	method case_tolerant                    { ::($module).case_tolerant()                }
+	method file_name_is_absolute( $file )   { ::($module).file_name_is_absolute( $file ) }
+	method path                             { ::($module).path()                         }
+	method join( *@parts )                  { ::($module).join( @parts )                 }
+	method splitpath( $path, $no_file = 0 ) { ::($module).splitpath( $path, $no_file )   }
+	method splitdir                         { ::($module).splitdir()                     }
+	method catpath                          { ::($module).catpath()                      }
+	method abs2rel                          { ::($module).abs2rel()                      }
+	method rel2abs                          { ::($module).rel2abs()                      }
 }
 
 1;

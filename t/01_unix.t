@@ -3,7 +3,7 @@ use lib 'lib';
 use Test;
 use File::Spec;
 
-plan 37;
+plan 46;
 
 if $*OS ~~ any(<MacOS MSWin32 os2 VMS epoc NetWare symbian dos cygwin>) {
 	skip_rest 'this is not Unix\'ish'
@@ -68,7 +68,21 @@ else {
 	is File::Spec.join('c'),           'c',     "join: 'c' -> 'c'";
 	is File::Spec.join('./c'),         'c',     "join: './c' -> 'c'";
 
-	#splitpath
+	my %splitpath = (
+		'file'            => ('', '',             'file'),
+		'/d1/d2/d3/'      => ('', '/d1/d2/d3/',   ''),
+		'd1/d2/d3/'       => ('', 'd1/d2/d3/',    ''),
+		'/d1/d2/d3/.'     => ('', '/d1/d2/d3/.',  ''),
+		'/d1/d2/d3/..'    => ('', '/d1/d2/d3/..', ''),
+		'/d1/d2/d3/.file' => ('', '/d1/d2/d3/',   '.file'),
+		'd1/d2/d3/file'   => ('', 'd1/d2/d3/',    'file'),
+		'/../../d1/'      => ('', '/../../d1/',   ''),
+		'/././d1/'        => ('', '/././d1/',     ''),
+	);
+	for %splitpath.kv -> $get, $want {
+		is File::Spec.splitpath( $get ), $want, "splitpath: '$get' -> '$want'";
+	}
+
 	#splitdir
 	#catpath
 	#abs2rel
