@@ -2,6 +2,18 @@
 module File::Spec::Unix;
 
 class File::Spec::Unix {
+	method canonpath {
+		
+	}
+
+	method catdir {
+		
+	}
+
+	method catfile {
+		
+	}
+
 	method curdir {
 		'.'
 	}
@@ -28,6 +40,46 @@ class File::Spec::Unix {
 	}
 
 	method updir { '..' }
+
+	method no_upwards {
+		
+	}
+
+	method case_tolerant {
+		
+	}
+
+	method file_name_is_absolute {
+		
+	}
+
+	method path {
+		
+	}
+
+	method join {
+		
+	}
+
+	method splitpath {
+		
+	}
+
+	method splitdir {
+		
+	}
+
+	method catpath {
+		
+	}
+
+	method abs2rel {
+		
+	}
+
+	method rel2abs {
+		
+	}
 }
 
 1;
