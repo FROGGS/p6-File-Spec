@@ -1,0 +1,7 @@
+{
+    "name" : "File::Spec",
+    "version" : "*",
+    "description" : "portably perform operations on file names",
+    "depends" : [ ],
+    "source-url" : "git://github.com/FROGGS/p6-File-Spec.git"
+}
