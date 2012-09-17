@@ -13,7 +13,7 @@ my %module = (
 	'cygwin'  => 'Cygwin'
 );
 
-my $module = "File::Spec::" ~ ($module{$*OS} // 'Unix');
+my $module = "File::Spec::" ~ (%module{$*OS} // 'Unix');
 
 require $module;
 
