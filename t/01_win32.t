@@ -3,7 +3,7 @@ use lib 'lib';
 use Test;
 use File::Spec;
 
-plan 4;
+plan 5;
 
 if $*OS !~~ any(<MSWin32 NetWare symbian>) {
 	skip_rest 'this is not Windows\'ish'
@@ -13,13 +13,13 @@ else {
 	#catdir
 	#catfile
 	is File::Spec.curdir,  '.',   'curdir is "."';
-	is File::Spec.devnull, 'nul', 'devnull is /dev/null';
-	is File::Spec.rootdir, '\\',  'rootdir is "/"';
+	is File::Spec.devnull, 'nul', 'devnull is nul';
+	is File::Spec.rootdir, '\\',  'rootdir is "\\"';
 	#tmpdir
 	is File::Spec.updir,   '..',  'updir is ".."';
 	#no_upwards
 
-	is File::Spec.case_tolerant, 1, 'case_tolerant is 0';
+	is File::Spec.case_tolerant, 1, 'case_tolerant is 1';
 
 	#file_name_is_absolute
 	#path
