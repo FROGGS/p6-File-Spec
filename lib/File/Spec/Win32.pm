@@ -15,7 +15,7 @@ class File::Spec::Win32 {
 	my $tmpdir;
 	method tmpdir {
 		return $tmpdir if $tmpdir.defined;
-		$tmpdir = self._tmpdir(
+		$tmpdir = ::('File::Spec::Unix')._tmpdir(
 			%*ENV{'TMPDIR'},
 			%*ENV{'TEMP'},
 			%*ENV{'TMP'},
