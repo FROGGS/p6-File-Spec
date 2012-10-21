@@ -96,8 +96,8 @@ class File::Spec::Unix {
 		}
 		else {
 			$path      ~~ m/^ ( [ .* \/ [ \.\.?$ ]? ]? ) (<-[\/]>*) /;
-			$directory = $0;
-			$file      = $1;
+			$directory = ~$0;
+			$file      = ~$1;
 		}
 
 		return ( $volume, $directory, $file );
