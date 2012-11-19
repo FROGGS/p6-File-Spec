@@ -19,7 +19,7 @@ class File::Spec::Unix {
 		}
 
 		$path ~~ s:g[\/+]            = '/';                     # xx////xx  -> xx/xx
-		$path ~~ s:g[[\/\.]+[\/|$]] = '/';                     # xx/././xx -> xx/xx
+		$path ~~ s:g{[\/\.]+[\/|$]} = '/';                     # xx/././xx -> xx/xx
 		$path ~~ s[^[\.\/]+]         = '' unless $path eq "./"; # ./xx      -> xx
 		$path ~~ s[^\/[\.\.\/]+]     = '/';                     # /../../xx -> xx
 		$path ~~ s[^\/\.\.$]         = '/';                     # /..       -> /
