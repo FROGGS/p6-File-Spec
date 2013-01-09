@@ -1,10 +1,8 @@
 
-module File::Spec::Cygwin;
-
-my $module = "File::Spec::Win32";
-require $module;
-
 class File::Spec::Cygwin {
+	my $module = "File::Spec::Win32";
+	require $module;
+
 	method canonpath             { ::($module).canonpath()             }
 	method catdir                { ::($module).catdir()                }
 	method catfile               { ::($module).catfile()               }

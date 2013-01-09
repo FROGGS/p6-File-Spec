@@ -1,10 +1,8 @@
 
-module File::Spec::Win32;
-
-my $module = "File::Spec::Unix";
-require $module;
-
 class File::Spec::Win32 {
+	my $module = "File::Spec::Unix";
+	require $module;
+
 	method canonpath(|c)         { ::($module).canonpath(|c)           }
 	method catdir(|c)            { ::($module).catdir(|c)              }
 	method catfile(|c)           { ::($module).catfile(|c)             }

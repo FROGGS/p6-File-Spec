@@ -1,10 +1,8 @@
 
-module File::Spec::Mac;
-
-my $module = "File::Spec::Unix";
-require $module;
-
 class File::Spec::Mac {
+	my $module = "File::Spec::Unix";
+	require $module;
+
 	method canonpath             { ::($module).canonpath()             }
 	method catdir                { ::($module).catdir()                }
 	method catfile               { ::($module).catfile()               }

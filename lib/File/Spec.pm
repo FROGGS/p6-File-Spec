@@ -1,23 +1,21 @@
 
-module File::Spec;
-
-my %module = (
-	'MacOS'   => 'Mac',
-	'MSWin32' => 'Win32',
-	'os2'     => 'OS2',
-	'VMS'     => 'VMS',
-	'epoc'    => 'Epoc',
-	'NetWare' => 'Win32', # Yes, File::Spec::Win32 works on NetWare.
-	'symbian' => 'Win32', # Yes, File::Spec::Win32 works on symbian.
-	'dos'     => 'OS2',   # Yes, File::Spec::OS2 works on DJGPP.
-	'cygwin'  => 'Cygwin'
-);
-
-my $module = "File::Spec::" ~ (%module{$*OS} // 'Unix');
-
-require $module;
-
 class File::Spec {
+	my %module = (
+		'MacOS'   => 'Mac',
+		'MSWin32' => 'Win32',
+		'os2'     => 'OS2',
+		'VMS'     => 'VMS',
+		'epoc'    => 'Epoc',
+		'NetWare' => 'Win32', # Yes, File::Spec::Win32 works on NetWare.
+		'symbian' => 'Win32', # Yes, File::Spec::Win32 works on symbian.
+		'dos'     => 'OS2',   # Yes, File::Spec::OS2 works on DJGPP.
+		'cygwin'  => 'Cygwin'
+	);
+
+	my $module = "File::Spec::" ~ (%module{$*OS} // 'Unix');
+
+	require $module;
+
 	method canonpath( $path )                   { ::($module).canonpath( $path )                   }
 	method catdir( *@parts )                    { ::($module).catdir( @parts )                     }
 	method catfile( *@parts )                   { ::($module).catfile( @parts )                    }

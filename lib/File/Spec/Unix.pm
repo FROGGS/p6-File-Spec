@@ -1,6 +1,4 @@
 
-module File::Spec::Unix;
-
 class File::Spec::Unix {
 	method canonpath( $path is copy ) {
 		return unless $path.defined;
