@@ -190,5 +190,3 @@ class File::Spec::Unix {
 		return self.canonpath( $path )
 	}
 }
-
-1;

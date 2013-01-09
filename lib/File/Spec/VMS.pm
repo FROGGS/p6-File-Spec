@@ -22,5 +22,3 @@ class File::Spec::VMS {
 	method abs2rel               { ::($module).abs2rel()               }
 	method rel2abs               { ::($module).rel2abs()               }
 }
-
-1;

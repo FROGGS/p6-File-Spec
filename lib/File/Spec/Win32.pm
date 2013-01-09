@@ -37,5 +37,3 @@ class File::Spec::Win32 {
 	method abs2rel(|c)               { ::($module).abs2rel(|c)               }
 	method rel2abs(|c)               { ::($module).rel2abs(|c)               }
 }
-
-1;

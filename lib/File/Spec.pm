@@ -35,5 +35,3 @@ class File::Spec {
 	method abs2rel( $path, $base = Str )        { ::($module).abs2rel( $path, $base )              }
 	method rel2abs( $path, $base = Str )        { ::($module).rel2abs( $path, $base )              }
 }
-
-1;
