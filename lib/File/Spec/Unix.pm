@@ -12,16 +12,35 @@ class File::Spec::Unix {
 
 
 		if $double_slashes_special
-		&& ( $path ~~ s[^(\/\/<-[\/]>+)\/?$] = '' || $path ~~ s[^(\/\/<-[\/]>+)\/] = '/' ) {
+		&& ( $path ~~ s {^ ( '//' <-[ '/' ]>+ ) '/'? $} = '' || $path ~~ s { ^ ( '//' <-[ '/' ]>+ ) '/' } = '/' ) {
 			$node = $0;
 		}
 
-		$path ~~ s:g[\/+]            = '/';                     # xx////xx  -> xx/xx
-		$path ~~ s:g{[\/\.]+[\/|$]} = '/';                     # xx/././xx -> xx/xx
-		$path ~~ s[^[\.\/]+]         = '' unless $path eq "./"; # ./xx      -> xx
-		$path ~~ s[^\/[\.\.\/]+]     = '/';                     # /../../xx -> xx
-		$path ~~ s[^\/\.\.$]         = '/';                     # /..       -> /
-		$path ~~ s[\/$]              = '' unless $path eq "/";  # xx/       -> xx
+		# xx////xx  -> xx/xx
+		$path ~~ s:g { '/'+ }       = '/';
+
+		# xx/././xx -> xx/xx
+		$path ~~ s:g { '/.'+ '/' }  = '/';
+
+		# xx/././xx -> xx/xx
+		$path ~~ s:g { '/.'+ $ }    = '/';
+
+		# ./xx      -> xx
+		unless $path eq "./" {
+			$path ~~ s { ^ './'+ }  = '';
+		}
+
+		# /../../xx -> xx
+		$path ~~ s { ^ '/' '../'+ } = '/';
+
+		# /..       -> /
+		$path ~~ s { ^ '/..' $ }    = '/';
+
+		# xx/       -> xx
+		unless $path eq "/" {
+			$path ~~ s { '/' $ }    = '';
+		}
+
 		return "$node$path";
 	}
 
