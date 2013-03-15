@@ -15,14 +15,16 @@ class File::Spec::Win32 {
 	method catdir(*@dirs)            {
 		# Legacy / compatibility support
 		return "" unless @dirs;
-		return canon_cat( "/", @dirs )
+		return canon_cat( "\\", |@dirs )
 			if @dirs[0] eq "";
 
 		# Compatibility with File::Spec <= 3.26:
 		#     catdir('A:', 'foo') should return 'A:\foo'.
-		return canon_cat( (@dirs[0]~'\\'), @dirs[1..*] )
-			if @dirs[0] ~~ /^<$driveletter>$/;
-
+		if @dirs[0] ~~ /^<$driveletter>$/ {
+		#	say @dirs.perl;
+			return canon_cat( (@dirs[0]~'\\'), |@dirs[1..*] )
+		}
+		#	say @dirs.perl;
 		return canon_cat(|@dirs);
 	}
 
@@ -71,15 +73,16 @@ class File::Spec::Win32 {
 		my $volumematch =
 		     $first ~~ /^ ([   <$driveletter> <$slash>?
 				    | <$UNCpath>
-				    | <$slash> ])
+				    | <$slash>+ ])?
 				   (.*)
 				/;
-		my $volume = $volumematch[0];
-		$first =     $volumematch[1];
+		my $volume = ~$volumematch[0];
+		$first =     ~$volumematch[1];
+		$volume ~~ s:g/ '/' /\\/;     #::
 	
 		my $path = join "\\", $first, @rest.flat;
 
-		$path ~~ s:g/ <$slash>+/\\/;    #:: xx/yy --> xx\yy & xx\\yy --> xx\yy
+		$path ~~ s:g/ <$slash>+ /\\/;    #:: xx/yy --> xx\yy & xx\\yy --> xx\yy
 
 		$path ~~ s:g/[ ^ | '\\']   '.'  '\\.'*  [ '\\' | $ ]/\\/;  #:: xx/././yy --> xx/yy
 
@@ -96,10 +99,9 @@ class File::Spec::Win32 {
 		$path ~~ s/ '\\' $//;		# xx\ --> xx
 
 
-
 		if ( $volume ~~ / '\\' $ / ) {
 							# <vol>\.. --> <vol>\ 
-			$path ~~ s/ $			# at begin
+			$path ~~ s/ ^			# at begin
 				    '..'
 				    '\\..'*		# and more
 				    [ '\\' | $ ]	# at end or followed by slash
