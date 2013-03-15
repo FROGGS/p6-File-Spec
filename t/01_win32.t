@@ -4,8 +4,28 @@ use Test;
 use File::Spec;
 use File::Spec::Win32;
 
-plan 33;
+plan 46;
 my $win32 = File::Spec::Win32.new;
+
+say "#canonpath tests";
+is $win32.canonpath(''),               '';
+is $win32.canonpath('a:'),             'A:';
+is $win32.canonpath('A:f'),            'A:f';
+is $win32.canonpath('A:/'),            'A:\\';
+is $win32.canonpath('a\\..\\..\\b\\c'), 'a\..\..\b\c';
+is $win32.canonpath('//a\\b//c'),      '\\\\a\\b\\c';
+is $win32.canonpath('/a/..../c'),      '\\a\\....\\c';
+is $win32.canonpath('//a/b\\c'),       '\\\\a\\b\\c';
+is $win32.canonpath('////'),           '\\';
+is $win32.canonpath('//'),             '\\';
+is $win32.canonpath('/.'),             '\\';
+is $win32.canonpath('//a/b/../../c'),  '\\\\a\\b\\c';
+is $win32.canonpath('\\../temp\\'),    '\\temp';
+is $win32.canonpath('\\../'),          '\\';
+is $win32.canonpath('\\..\\'),         '\\';
+is $win32.canonpath('/../'),           '\\';
+is $win32.canonpath('/..\\'),          '\\';
+is $win32.canonpath('d1/../foo'),      'd1\\..\\foo';
 
 say "# catdir tests";
 is $win32.catdir(),                        '';
@@ -36,6 +56,8 @@ is $win32.catdir('A:/'),                   'A:\\';
 is $win32.catdir('\\', 'foo'),             '\\foo';
 is $win32.catdir('','','..'),              '\\';
 is $win32.catdir('A:', 'foo'),             'A:\\foo';
+
+
 
 if 0 { #todo
 	say "# catpath tests";

@@ -6,11 +6,11 @@ class File::Spec::Win32 {
 	# Some regexes we use for path splitting
 	my $driveletter = regex { <[a..zA..Z]> ':' }
 	my $slash	= regex { '/' | '\\' }
-	my $UNCpath     = regex { [<$slash> ** 2] <-[\\\/]>+  <$slash>  <-[\\\/]>+  }
+	my $UNCpath     = regex { [<$slash> ** 2] <-[\\\/]>+  <$slash>  [<-[\\\/]>+ | $] }
 	my $volume      = regex { $<driveletter>=<$driveletter> | $<UNCpath>=<$UNCpath> }
 
 
-	method canonpath(|c)         { ::($module).canonpath(|c)           }
+	method canonpath ($path)         { canon_cat($path)               }
 
 	method catdir(*@dirs)            {
 		# Legacy / compatibility support
@@ -21,10 +21,8 @@ class File::Spec::Win32 {
 		# Compatibility with File::Spec <= 3.26:
 		#     catdir('A:', 'foo') should return 'A:\foo'.
 		if @dirs[0] ~~ /^<$driveletter>$/ {
-		#	say @dirs.perl;
 			return canon_cat( (@dirs[0]~'\\'), |@dirs[1..*] )
 		}
-		#	say @dirs.perl;
 		return canon_cat(|@dirs);
 	}
 
@@ -73,12 +71,22 @@ class File::Spec::Win32 {
 		my $volumematch =
 		     $first ~~ /^ ([   <$driveletter> <$slash>?
 				    | <$UNCpath>
-				    | <$slash>+ ])?
+				    | [<$slash> ** 2] <-[\\\/]>+
+				    | <$slash> ])?
 				   (.*)
 				/;
 		my $volume = ~$volumematch[0];
 		$first =     ~$volumematch[1];
-		$volume ~~ s:g/ '/' /\\/;     #::
+
+		#$volume ~~ s:g/ '/' /\\/;     #::
+		$volume.=subst(:g, '/', '\\');
+		if $volume ~~ /^<$driveletter>/ {
+			$volume.=uc;
+		}
+		else {
+			$volume ~~ /<-[\\\/]>$/ and $volume ~= '\\';
+			$volume ~~ /^<[\\\/]>$/ and $volume = '\\'; #::
+		}
 	
 		my $path = join "\\", $first, @rest.flat;
 
@@ -95,8 +103,8 @@ class File::Spec::Win32 {
 		#Perl 5 File::Spec does " xx\yy\..\zz --> xx\zz" here, but Win >= Vista
 		# does symlinks linux style, so we're taking that out.
 
-		$path ~~ s/^ '\\' //;		# \xx --> xx  NOTE: this is *not* root
-		$path ~~ s/ '\\' $//;		# xx\ --> xx
+		$path ~~ s/^ '\\'+ //;		# \xx --> xx  NOTE: this is *not* root
+		$path ~~ s/ '\\'+ $//;		# xx\ --> xx
 
 
 		if ( $volume ~~ / '\\' $ / ) {
