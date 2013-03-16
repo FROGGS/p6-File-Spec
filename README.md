@@ -9,9 +9,9 @@ Usage:
 Methods (current state):
 
 	                       Unix   Mac   OS2  Win32  VMS Cygwin Epoc
-	canonpath              done                                    
-	catdir                 done                        
-	catfile                done                        
+	canonpath              done  done        done                  
+	catdir                 done              done      
+	catfile                done              done      
 	curdir                 done  done        done      
 	devnull                done  done        done      
 	rootdir                done              done      
@@ -19,11 +19,11 @@ Methods (current state):
 	updir                  done  done        done      
 	no_upwards             done                        
 	case_tolerant          done  done  done  done  done        done
-	file_name_is_absolute  done                                    
+	file_name_is_absolute  done  done        done                  
 	path                   done                                    
 	join                   done                                    
-	splitpath              done                                    
-	splitdir               done                                    
-	catpath                done                                    
+	splitpath              done  done        done                  
+	splitdir               done              done                  
+	catpath                done              done                  
 	abs2rel                done                                    
 	rel2abs                done                                    

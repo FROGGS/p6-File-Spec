@@ -4,7 +4,7 @@ use Test;
 use File::Spec;
 use File::Spec::Win32;
 
-plan 46;
+plan 78;
 my $win32 = File::Spec::Win32.new;
 
 say "#canonpath tests";
@@ -56,10 +56,40 @@ is $win32.catdir('A:/'),                   'A:\\';
 is $win32.catdir('\\', 'foo'),             '\\foo';
 is $win32.catdir('','','..'),              '\\';
 is $win32.catdir('A:', 'foo'),             'A:\\foo';
+say "# splitpath tests";
+is $win32.splitpath('file').join(','),                            ',,file';
+is $win32.splitpath('\\d1/d2\\d3/').join(','),                    ',\\d1/d2\\d3/,';
+is $win32.splitpath('d1/d2\\d3/').join(','),                      ',d1/d2\\d3/,';
+is $win32.splitpath('\\d1/d2\\d3/.').join(','),                   ',\\d1/d2\\d3/.,';
+is $win32.splitpath('\\d1/d2\\d3/..').join(','),                  ',\\d1/d2\\d3/..,';
+is $win32.splitpath('\\d1/d2\\d3/.file').join(','),               ',\\d1/d2\\d3/,.file';
+is $win32.splitpath('\\d1/d2\\d3/file').join(','),                ',\\d1/d2\\d3/,file';
+is $win32.splitpath('d1/d2\\d3/file').join(','),                  ',d1/d2\\d3/,file';
+is $win32.splitpath('C:\\d1/d2\\d3/').join(','),                  'C:,\\d1/d2\\d3/,';
+is $win32.splitpath('C:d1/d2\\d3/').join(','),                    'C:,d1/d2\\d3/,';
+is $win32.splitpath('C:\\d1/d2\\d3/file').join(','),              'C:,\\d1/d2\\d3/,file';
+is $win32.splitpath('C:d1/d2\\d3/file').join(','),                'C:,d1/d2\\d3/,file';
+is $win32.splitpath('C:\\../d2\\d3/file').join(','),              'C:,\\../d2\\d3/,file';
+is $win32.splitpath('C:../d2\\d3/file').join(','),                'C:,../d2\\d3/,file';
+is $win32.splitpath('\\../..\\d1/').join(','),                    ',\\../..\\d1/,';
+is $win32.splitpath('\\./.\\d1/').join(','),                      ',\\./.\\d1/,';
+is $win32.splitpath('\\\\node\\share\\d1/d2\\d3/').join(','),     '\\\\node\\share,\\d1/d2\\d3/,';
+is $win32.splitpath('\\\\node\\share\\d1/d2\\d3/file').join(','), '\\\\node\\share,\\d1/d2\\d3/,file';
+is $win32.splitpath('\\\\node\\share\\d1/d2\\file').join(','),    '\\\\node\\share,\\d1/d2\\,file';
+is $win32.splitpath('file',1).join(','),                          ',file,';
+is $win32.splitpath('\\d1/d2\\d3/',1).join(','),                  ',\\d1/d2\\d3/,';
+is $win32.splitpath('d1/d2\\d3/',1).join(','),                    ',d1/d2\\d3/,';
+is $win32.splitpath('\\\\node\\share\\d1/d2\\d3/',1).join(','),   '\\\\node\\share,\\d1/d2\\d3/,';
+
+say "# splitdir tests";
+is $win32.splitdir(''),             '';
+is $win32.splitdir('\\d1/d2\\d3/').join(','), ',d1,d2,d3,';
+is $win32.splitdir('d1/d2\\d3/').join(','),   'd1,d2,d3,';
+is $win32.splitdir('\\d1/d2\\d3').join(','),  ',d1,d2,d3';
+is $win32.splitdir('d1/d2\\d3').join(','),    'd1,d2,d3';
 
 
-
-if 0 { #todo
+if 1 { #todo
 	say "# catpath tests";
 	is $win32.catpath('','','file'),                            'file';
 	is $win32.catpath('','\\d1/d2\\d3/',''),                    '\\d1/d2\\d3/';

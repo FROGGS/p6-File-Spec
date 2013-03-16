@@ -7,7 +7,7 @@ class File::Spec::Win32 {
 	my $driveletter = regex { <[a..zA..Z]> ':' }
 	my $slash	= regex { '/' | '\\' }
 	my $UNCpath     = regex { [<$slash> ** 2] <-[\\\/]>+  <$slash>  [<-[\\\/]>+ | $] }
-	my $volume      = regex { $<driveletter>=<$driveletter> | $<UNCpath>=<$UNCpath> }
+	my $volume_rx   = regex { $<driveletter>=<$driveletter> | $<UNCpath>=<$UNCpath> }
 
 
 	method canonpath ($path)         { canon_cat($path)               }
@@ -26,7 +26,7 @@ class File::Spec::Win32 {
 		return canon_cat(|@dirs);
 	}
 
-	method catfile(|c)           { ::($module).catfile(|c)             }
+	method catfile(|c)           { self.catdir(|c)                     }
 	method curdir                { ::($module).curdir()                }
 	method devnull               { 'nul'                               }
 	method rootdir               { '\\'                                }
@@ -60,9 +60,43 @@ class File::Spec::Win32 {
 	}
 	method path                      { ::($module).path()                    }
 	method join(|c)                  { ::($module).join()                    }
-	method splitpath(|c)             { ::($module).splitpath(|c)             }
-	method splitdir(|c)              { ::($module).splitdir(|c)              }
-	method catpath(|c)               { ::($module).catpath(|c)               }
+
+	method splitpath($path as Str, $nofile as Bool = False) { 
+
+		my ($volume,$directory,$file) = ('','','');
+		if ( $nofile ) {
+			$path ~~ 
+			    /^ (<$volume_rx>?) (.*) /;
+			$volume    = ~$0;
+			$directory = ~$1;
+		}
+		else {
+			$path ~~ 
+			    m/^ ( <$volume_rx> ? )
+				( [ .* <$slash> [ '.' ** 1..2 $]? ]? )
+				(.*)
+			     /;
+			$volume    = ~$0;
+			$directory = ~$1;
+			$file      = ~$2;
+		}
+
+   		return ($volume,$directory,$file);
+	}
+
+	method splitdir($dir)            { $dir.split($slash)                    }
+	method catpath($volume is copy, $directory, $file) {
+
+		# Make sure the glue separator is present
+		# unless it's a relative like A:foo.txt
+		if $volume ne ''
+		   and $volume !~~ /^<$driveletter>/
+		   and $volume !~~ /<$slash> $/
+		   and $directory !~~ /^ <$slash>/
+			{ $volume ~ '\\' ~ $directory ~ $file; }
+		else 	{ $volume ~        $directory ~ $file; }
+	}
+
 	method abs2rel(|c)               { ::($module).abs2rel(|c)               }
 	method rel2abs(|c)               { ::($module).rel2abs(|c)               }
 
@@ -127,6 +161,6 @@ class File::Spec::Win32 {
 }
 
 #my $foo = File::Spec::Win32.new;
-#say $foo.file_name_is_absolute("C:\\doc & shit\\moo.exe");
+#say $foo.splitpath("C:\\doc & stuff\\moo.exe").perl;
 #say $foo.catdir('C:\\', "perl", "../erf", "lolx\\\\e");
 
