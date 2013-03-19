@@ -82,7 +82,7 @@ method case_tolerant (Str:D $path = cwd(), $write_ok as Bool = True ) {
 	}
 
 	# Okay, we don't have write access... give up and just return the platform default
-	return ::($module).case_sensitive;
+	return ::($module).case_tolerant;
 
 }
 
