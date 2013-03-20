@@ -51,8 +51,14 @@ else {
 	my @want = <.git blib lib t>;
 	is_deeply File::Spec.no_upwards( @get ), @want, 'no_upwards: (. .. .git blib lib t) -> (.git blib lib t)';
 
-	is File::Spec.case_tolerant, 0, 'case_tolerant is 0';
-
+	#case_tolerant
+	if (cwd.IO ~~ :w) {
+		"casetol.tmp".path.e or spurt "casetol.tmp", "temporary test file, delete after reading";
+		is File::Spec.case_tolerant("casetol.tmp"), so "CASETOL.TMP".path.e, "case_tolerant is {so "CASETOL.TMP".path.e} in cwd";
+		unlink "casetol.tmp";
+	}
+	else { skip "case_tolerant, no write access in cwd", 1; } 
+	
 	ok  File::Spec.file_name_is_absolute( '/abcd' ), 'file_name_is_absolute: ok "/abcd"';
 	nok File::Spec.file_name_is_absolute( 'abcd' ),  'file_name_is_absolute: nok "abcd"';
 
