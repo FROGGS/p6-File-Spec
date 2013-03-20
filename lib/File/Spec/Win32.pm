@@ -48,7 +48,8 @@ class File::Spec::Win32 {
 
 	method updir                     { ::($module).updir()                   }
 	method no_upwards(|c)            { ::($module).no_upwards(|c)            }
-	method case_tolerant             { 1                                     }
+	#method case_tolerant(|c)         { ::($module).case_tolerant(|c)            }
+	method default_case_tolerant     { 1                                     }
 	method file_name_is_absolute ($path) {
 		# As of right now, this returns 2 if the path is absolute with a
 		# volume, 1 if it's absolute with no volume, 0 otherwise.

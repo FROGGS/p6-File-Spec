@@ -25,34 +25,34 @@ method rootdir                              { ::($module).rootdir()             
 method tmpdir                               { ::($module).tmpdir()                             }
 method updir                                { ::($module).updir()                              }
 method no_upwards( *@paths )                { ::($module).no_upwards( @paths )                 }
-#method case_tolerant                        { ::($module).case_tolerant()                      }
+method default_case_tolerant                { ::($module).default_case_tolerant()                      }
 method file_name_is_absolute( $file )       { ::($module).file_name_is_absolute( $file )       }
 method path                                 { ::($module).path()                               }
 method join( *@parts )                      { ::($module).join( @parts )                       }
 method splitpath( $path, $no_file = 0 )     { ::($module).splitpath( $path, $no_file )         }
 method splitdir( $path )                    { ::($module).splitdir( $path )                    }
-method catpath( $volume, $directoy, $file ) { ::($module).catpath( $volume, $directoy, $file ) }
+method catpath( $volume, $directory, $file ) { ::($module).catpath( $volume, $directory, $file ) }
 method abs2rel( $path, $base = Str )        { ::($module).abs2rel( $path, $base )              }
 method rel2abs( $path, $base = Str )        { ::($module).rel2abs( $path, $base )              }
 
 
-method case_tolerant (Str:D $path = cwd(), $write_ok as Bool = True ) {
+method case_tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
+	# This code should be platform independent, but here's a local override
+	return ::($module).case_tolerant if ::($module).can('case_tolerant');
 
 	$path.path.e or fail "Invalid path given";
-	my @dirs = File::Spec.splitdir(File::Spec.canonpath($path));
+	my @dirs = File::Spec.splitdir(File::Spec.rel2abs($path));
 	my @searchabledirs;
-	my $can_inode = 0;  #  should be: so $path.path.inode;
 
 	# try looking at each component of $path to see if has letters
 	loop (my $i = +@dirs; $i--; $i <= 0) {
 		my $p = File::Spec.catdir(@dirs[0..$i]);
-		# say "$p:", $p.path.inode;
 		push(@searchabledirs, $p) if $p.path.d;
 
 		last if $p.IO.l;
 		next unless @dirs[$i] ~~ /<.alpha>/;
 
-		return case_tolerant_folder @dirs[0..($i-1)], @dirs[$i], $can_inode;
+		return case_tolerant_folder @dirs[0..($i-1)], @dirs[$i];
 	}
 
 	# If nothing in $path contains a letter, search for nearby files, including up the tree
@@ -62,7 +62,7 @@ method case_tolerant (Str:D $path = cwd(), $write_ok as Bool = True ) {
 		next unless @filelist.elems;
 
 		# anything with <alpha> will do
-		return case_tolerant_folder $d, @filelist[0], $can_inode;
+		return case_tolerant_folder $d, @filelist[0];
 	}
 
 	# If we couldn't find anything suitable, try writing a test file
@@ -77,26 +77,21 @@ method case_tolerant (Str:D $path = cwd(), $write_ok as Bool = True ) {
 				unlink $filelc;
 				return $result;
 			}
-			CATCH { unlink $filelc; }
+			CATCH { unlink $filelc unless $filelc.path.e; }
 		}
 	}
 
 	# Okay, we don't have write access... give up and just return the platform default
-	return ::($module).case_tolerant;
+	return ::($module).default_case_tolerant;
 
 }
 
-sub case_tolerant_folder( \updirs, $curdir, $inode_works ) {
-	if $inode_works {
-		return File::Spec.catdir( |updirs, $curdir.uc).path.inode
-			== File::Spec.catdir( |updirs, $curdir.lc).path.inode;
-	}
-	else {
-		my $numdirs = +File::Spec.catdir(|updirs).path.contents.grep(/:i ^ $curdir $/);
-		if $numdirs > 1 { return False; }
-		else { return (File::Spec.catdir( |updirs, $curdir.uc).path.e
-				&& File::Spec.catdir( |updirs, $curdir.lc).path.e ) };
-	}
+sub case_tolerant_folder( \updirs, $curdir ) {
+	return False unless File::Spec.catdir( |updirs, $curdir.uc).path.e
+			 && File::Spec.catdir( |updirs, $curdir.lc).path.e;
+	return +File::Spec.catdir(|updirs).path.contents.grep(/:i ^ $curdir $/) <= 1;
+	# this could be faster by comparing inodes of .uc and .lc
+	# but we can't guarantee POSIXness of every platform that calls this
 }
 
 
