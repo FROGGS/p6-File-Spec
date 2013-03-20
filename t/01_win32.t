@@ -4,7 +4,7 @@ use Test;
 use File::Spec;
 use File::Spec::Win32;
 
-plan 78;
+plan 121;
 my $win32 = File::Spec::Win32.new;
 
 say "#canonpath tests";
@@ -88,29 +88,30 @@ is $win32.splitdir('d1/d2\\d3/').join(','),   'd1,d2,d3,';
 is $win32.splitdir('\\d1/d2\\d3').join(','),  ',d1,d2,d3';
 is $win32.splitdir('d1/d2\\d3').join(','),    'd1,d2,d3';
 
+say "# catpath tests";
+is $win32.catpath('','','file'),                            'file';
+is $win32.catpath('','\\d1/d2\\d3/',''),                    '\\d1/d2\\d3/';
+is $win32.catpath('','d1/d2\\d3/',''),                      'd1/d2\\d3/';
+is $win32.catpath('','\\d1/d2\\d3/.',''),                   '\\d1/d2\\d3/.';
+is $win32.catpath('','\\d1/d2\\d3/..',''),                  '\\d1/d2\\d3/..';
+is $win32.catpath('','\\d1/d2\\d3/','.file'),               '\\d1/d2\\d3/.file';
+is $win32.catpath('','\\d1/d2\\d3/','file'),                '\\d1/d2\\d3/file';
+is $win32.catpath('','d1/d2\\d3/','file'),                  'd1/d2\\d3/file';
+is $win32.catpath('C:','\\d1/d2\\d3/',''),                  'C:\\d1/d2\\d3/';
+is $win32.catpath('C:','d1/d2\\d3/',''),                    'C:d1/d2\\d3/';
+is $win32.catpath('C:','\\d1/d2\\d3/','file'),              'C:\\d1/d2\\d3/file';
+is $win32.catpath('C:','d1/d2\\d3/','file'),                'C:d1/d2\\d3/file';
+is $win32.catpath('C:','\\../d2\\d3/','file'),              'C:\\../d2\\d3/file';
+is $win32.catpath('C:','../d2\\d3/','file'),                'C:../d2\\d3/file';
+is $win32.catpath('','\\../..\\d1/',''),                    '\\../..\\d1/';
+is $win32.catpath('','\\./.\\d1/',''),                      '\\./.\\d1/';
+is $win32.catpath('\\\\node\\share','\\d1/d2\\d3/',''),     '\\\\node\\share\\d1/d2\\d3/';
+is $win32.catpath('\\\\node\\share','\\d1/d2\\d3/','file'), '\\\\node\\share\\d1/d2\\d3/file';
+is $win32.catpath('\\\\node\\share','\\d1/d2\\','file'),    '\\\\node\\share\\d1/d2\\file';
 
-if 1 { #todo
-	say "# catpath tests";
-	is $win32.catpath('','','file'),                            'file';
-	is $win32.catpath('','\\d1/d2\\d3/',''),                    '\\d1/d2\\d3/';
-	is $win32.catpath('','d1/d2\\d3/',''),                      'd1/d2\\d3/';
-	is $win32.catpath('','\\d1/d2\\d3/.',''),                   '\\d1/d2\\d3/.';
-	is $win32.catpath('','\\d1/d2\\d3/..',''),                  '\\d1/d2\\d3/..';
-	is $win32.catpath('','\\d1/d2\\d3/','.file'),               '\\d1/d2\\d3/.file';
-	is $win32.catpath('','\\d1/d2\\d3/','file'),                '\\d1/d2\\d3/file';
-	is $win32.catpath('','d1/d2\\d3/','file'),                  'd1/d2\\d3/file';
-	is $win32.catpath('C:','\\d1/d2\\d3/',''),                  'C:\\d1/d2\\d3/';
-	is $win32.catpath('C:','d1/d2\\d3/',''),                    'C:d1/d2\\d3/';
-	is $win32.catpath('C:','\\d1/d2\\d3/','file'),              'C:\\d1/d2\\d3/file';
-	is $win32.catpath('C:','d1/d2\\d3/','file'),                'C:d1/d2\\d3/file';
-	is $win32.catpath('C:','\\../d2\\d3/','file'),              'C:\\../d2\\d3/file';
-	is $win32.catpath('C:','../d2\\d3/','file'),                'C:../d2\\d3/file';
-	is $win32.catpath('','\\../..\\d1/',''),                    '\\../..\\d1/';
-	is $win32.catpath('','\\./.\\d1/',''),                      '\\./.\\d1/';
-	is $win32.catpath('\\\\node\\share','\\d1/d2\\d3/',''),     '\\\\node\\share\\d1/d2\\d3/';
-	is $win32.catpath('\\\\node\\share','\\d1/d2\\d3/','file'), '\\\\node\\share\\d1/d2\\d3/file';
-	is $win32.catpath('\\\\node\\share','\\d1/d2\\','file'),    '\\\\node\\share\\d1/d2\\file';
-}
+
+
+
 
 
 if $*OS !~~ any(<MSWin32 NetWare symbian>) {
@@ -135,8 +136,31 @@ else {
 	#splitpath
 	#splitdir
 	#catpath
-	#abs2rel
-	#rel2ab
+	#rel2abs
+	say "# abs2rel tests";
+	is $win32.abs2rel('/t1/t2/t3','/t1/t2/t3'),     '.';
+	is $win32.abs2rel('/t1/t2/t4','/t1/t2/t3'),     '..\\t4';
+	is $win32.abs2rel('/t1/t2','/t1/t2/t3'),        '..';
+	is $win32.abs2rel('/t1/t2/t3/t4','/t1/t2/t3'),  't4';
+	is $win32.abs2rel('/t4/t5/t6','/t1/t2/t3'),     '..\\..\\..\\t4\\t5\\t6';
+	is $win32.abs2rel('../t4','/t1/t2/t3'),         '..\\..\\..\\one\\t4';  # Uses _cwd()
+	is $win32.abs2rel('/','/t1/t2/t3'),             '..\\..\\..';
+	is $win32.abs2rel('///','/t1/t2/t3'),           '..\\..\\..';
+	is $win32.abs2rel('/.','/t1/t2/t3'),            '..\\..\\..';
+	is $win32.abs2rel('/./','/t1/t2/t3'),           '..\\..\\..';
+	is $win32.abs2rel('\\\\a/t1/t2/t4','/t2/t3'),   '\\\\a\\t1\\t2\\t4';
+	is $win32.abs2rel('//a/t1/t2/t4','/t2/t3'),     '\\\\a\\t1\\t2\\t4';
+	is $win32.abs2rel('A:/t1/t2/t3','A:/t1/t2/t3'),     '.';
+	is $win32.abs2rel('A:/t1/t2/t3/t4','A:/t1/t2/t3'),  't4';
+	is $win32.abs2rel('A:/t1/t2/t3','A:/t1/t2/t3/t4'),  '..';
+	is $win32.abs2rel('A:/t1/t2/t3','B:/t1/t2/t3'),     'A:\\t1\\t2\\t3';
+	is $win32.abs2rel('A:/t1/t2/t3/t4','B:/t1/t2/t3'),  'A:\\t1\\t2\\t3\\t4';
+	is $win32.abs2rel('E:/foo/bar/baz'),            'E:\\foo\\bar\\baz';
+	is $win32.abs2rel('C:/one/two/three'),          'three';
+	is $win32.abs2rel('C:\\Windows\\System32', 'C:\\'),  'Windows\System32';
+	is $win32.abs2rel('\\\\computer2\\share3\\foo.txt', '\\\\computer2\\share3'),  'foo.txt';
+	is $win32.abs2rel('C:\\one\\two\\t\\asd1\\', 't\\asd\\'), '..\\asd1';
+	is $win32.abs2rel('\\one\\two', 'A:\\foo'),     'C:\\one\\two';
 }
 
 done;
