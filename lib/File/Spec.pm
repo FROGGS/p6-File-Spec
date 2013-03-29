@@ -12,18 +12,27 @@ my %module = (
 	'dos'     => 'OS2',   # Yes, File::Spec::OS2 works on DJGPP.
 	'cygwin'  => 'Cygwin',
 	# in case someone passes a module name instead of an OS string
-	#  map to themselves
+	#  map it to themselves
 	<Unix Mac Win32 OS2 Epoc Cygwin> »xx» 2
 );
 
+# preload $*OS, so that current OS works without constructor
+$module = "File::Spec::" ~ (%module{$*OS} // 'Unix');
+require $module;
+
+# constructor can load a different OS/module
 submethod BUILD (:$!OS = $*OS) {
 	$module = "File::Spec::" ~ (%module{$!OS} // 'Unix');
 	require $module;
 }
-method OS				    { $!OS; }
+
+#introspection
+method OS				    { self.defined ?? $!OS !! $*OS; }
 method OS_module                            { $module; }
+multi method gist (File::Spec:D: )	    { self.^name ~ "<" ~ self.OS ~ ', ' ~ self.OS_module ~ '>' }
+multi method perl (File::Spec:D: )	    { self.^name ~ '.new(OS=>' ~ self.OS.perl ~ ')' }
 
-
+# class methods
 method canonpath( $path )                   { ::($module).canonpath( $path )                   }
 method catdir( *@parts )                    { ::($module).catdir( @parts )                     }
 method catfile( *@parts )                   { ::($module).catfile( @parts )                    }
