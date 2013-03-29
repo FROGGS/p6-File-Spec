@@ -11,7 +11,6 @@ if $*OS ~~ any(<MacOS MSWin32 os2 VMS epoc NetWare symbian dos cygwin>) {
 else {
 	my %canonpath = (
 		'///../../..//./././a//b/.././c/././' => '/a/b/../c',
-		''                                    => '',
 		'a/../../b/c'                         => 'a/../../b/c',
 		'/.'                                  => '/',
 		'/./'                                 => '/',
@@ -24,6 +23,7 @@ else {
 	for %canonpath.kv -> $get, $want {
 		is File::Spec.canonpath( $get ), $want, "canonpath: '$get' -> '$want'";
 	}
+	is File::Spec.canonpath(''), '', "canonpath: empty string";
 
 	is File::Spec.catdir( ),                      '',          "catdir: no arg -> ''";
 	is File::Spec.catdir( '' ),                   '/',         "catdir: '' -> '/'";
