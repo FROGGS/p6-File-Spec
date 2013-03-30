@@ -9,6 +9,7 @@ if $*OS ~~ any(<MacOS MSWin32 os2 VMS epoc NetWare symbian dos cygwin>) {
 	skip_rest 'this is not Unix\'ish'
 }
 else {
+	
 	my %canonpath = (
 		'///../../..//./././a//b/.././c/././' => '/a/b/../c',
 		'a/../../b/c'                         => 'a/../../b/c',
@@ -76,14 +77,14 @@ else {
 
 	my %splitpath = (
 		'file'            => ('', '',             'file'),
-		'/d1/d2/d3/'      => ('', '/d1/d2/d3/',   ''),
-		'd1/d2/d3/'       => ('', 'd1/d2/d3/',    ''),
+		'/d1/d2/d3/'      => ('', '/d1/d2/d3',   ''),
+		'd1/d2/d3/'       => ('', 'd1/d2/d3',    ''),
 		'/d1/d2/d3/.'     => ('', '/d1/d2/d3/.',  ''),
 		'/d1/d2/d3/..'    => ('', '/d1/d2/d3/..', ''),
-		'/d1/d2/d3/.file' => ('', '/d1/d2/d3/',   '.file'),
-		'd1/d2/d3/file'   => ('', 'd1/d2/d3/',    'file'),
-		'/../../d1/'      => ('', '/../../d1/',   ''),
-		'/././d1/'        => ('', '/././d1/',     ''),
+		'/d1/d2/d3/.file' => ('', '/d1/d2/d3',   '.file'),
+		'd1/d2/d3/file'   => ('', 'd1/d2/d3',    'file'),
+		'/../../d1/'      => ('', '/../../d1',   ''),
+		'/././d1/'        => ('', '/././d1',     ''),
 	);
 	for %splitpath.kv -> $get, $want {
 		is File::Spec.splitpath( $get ), $want, "splitpath: '$get' -> '$want'";
