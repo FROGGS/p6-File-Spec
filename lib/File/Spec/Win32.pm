@@ -31,18 +31,20 @@ method curdir                { ::($module).curdir()                }
 method devnull               { 'nul'                               }
 method rootdir               { '\\'                                }
 
-my $tmpdir;
+
 method tmpdir {
+	state $tmpdir;
 	return $tmpdir if $tmpdir.defined;
 	$tmpdir = ::($module)._tmpdir(
-		%*ENV{'TMPDIR'},
-		%*ENV{'TEMP'},
-		%*ENV{'TMP'},
+		%*ENV<TMPDIR>,
+		%*ENV<TEMP>,
+		%*ENV<TMP>,
 		'SYS:/temp',
 		'C:\system\temp',
 		'C:/temp',
 		'/tmp',
-		'/'
+		'/',
+		self.curdir
 	);
 }
 
