@@ -1,20 +1,18 @@
 use File::Spec::Unix;
+use File::Spec::Win32;
 class File::Spec::Cygwin is File::Spec::Unix;
-
-my $module = "File::Spec::Unix";
-require $module;
 
 #| Any C<\> (backslashes) are converted to C</> (forward slashes),
 #| and then File::Spec::Unix.canonpath() is called on the result.
 method canonpath (Mu:D $path as Str is copy) {
-	$path ~~ s:g★\\★/★;
+	$path ~~ s:g★\\★/★;   #::
 
 	# Handle network path names beginning with double slash
 	my $node = '';
 	if $path ~~ s★^ ('//' <-[/]>+) [ '/' | $ ]  ★/★ {
 	$node = ~$0;
 	}
-	$node ~ ::($module).canonpath($path);
+	$node ~ File::Spec::Unix.canonpath($path);
 }
 
 #| Calls the Unix version, and additionally prevents
@@ -22,7 +20,7 @@ method canonpath (Mu:D $path as Str is copy) {
 method catdir ( *@paths ) {
 	# return unless @_;
 
-	my $result = ::($module).catdir(@paths);
+	my $result = File::Spec::Unix.catdir(@paths);
 
 	# Don't create something that looks like a //network/path
 	$result.subst(/ <[\\\/]> ** 2..*/, '/'); 	#/
@@ -40,13 +38,13 @@ method catdir ( *@paths ) {
 #| and if not, File::Spec::Unix.file_name_is_absolute is called.
 sub file_name_is_absolute ($file) {
     return True if $file ~~ m★ ^ [<[A..Z a..z]>:]?  <[\\/]>★; # C:/test
-    ::($module).file_name_is_absolute($file);
+    File::Spec::Unix.file_name_is_absolute($file);
 }
 
 method tmpdir {
     state $tmpdir;
     return $tmpdir if defined $tmpdir;
-    $tmpdir = ::($module)._tmpdir(
+    $tmpdir = File::Spec::Unix._tmpdir(
 		 %*ENV<TMPDIR>,
 		 "/tmp",
 		 %*ENV<TMP>,
@@ -54,6 +52,11 @@ method tmpdir {
 		 'C:/temp',
 		 self.curdir );
 }
+
+
+#| Paths might have a volume, so we use Win32 splitpath and catpath instead
+method splitpath ( $path, $nofile = False )      { File::Spec::Win32.splitpath( $path, $nofile ) }
+method catpath (|c)           { self.canonpath( File::Spec::Win32.catpath(|c) ) }
 
 #method catfile               { ::($module).catfile()               }
 #method curdir                { ::($module).curdir()                }
