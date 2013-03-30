@@ -62,21 +62,20 @@ method devnull { '/dev/null' }
 
 method rootdir { '/' }
 
-my $tmpdir;
 method _tmpdir( *@dirlist ) {
-	return $tmpdir if $tmpdir.defined;
-	for @dirlist -> $dir {
-		next unless $dir.defined && $dir.IO.d && $dir.IO.w;
-		$tmpdir = $dir;
-		last;
-	}
-	$tmpdir = self.curdir unless $tmpdir.defined;
-	$tmpdir = $tmpdir.defined && self.canonpath( $tmpdir );
-	return $tmpdir;
+	my $tmpdir = @dirlist.first({ .defined && .IO.d && .IO.w })
+		or fail "No viable candidates for a temporary directory found";
+	$tmpdir = self.canonpath( $tmpdir );
 }
+
 method tmpdir {
+	state $tmpdir;
 	return $tmpdir if $tmpdir.defined;
-	$tmpdir = self._tmpdir( %*ENV{'TMPDIR'}, '/tmp' );
+	return $tmpdir = self._tmpdir(
+				%*ENV{'TMPDIR'},
+				'/tmp',
+				self.curdir
+	                 );
 }
 
 method updir { '..' }
@@ -112,10 +111,11 @@ method splitpath( $path, $nofile ) {
 		$directory = $path;
 	}
 	else {
-		$path      ~~ m/^ ( [ .* \/ [ \.\.?$ ]? ]? ) (<-[\/]>*) /;
+		$path      ~~ m/^ ( [ .* \/ [ '.'**1..2 $ ]? ]? ) (<-[\/]>*) /; 
 		$directory = ~$0;
 		$file      = ~$1;
 	}
+	$directory ~~ s/<?after .> '/'+ $ //; 
 
 	return ( $volume, $directory, $file );
 }
