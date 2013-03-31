@@ -51,7 +51,7 @@ method tmpdir {
 method updir                     { ::($module).updir()                   }
 method no_upwards(|c)            { ::($module).no_upwards(|c)            }
 #method case_tolerant(|c)         { ::($module).case_tolerant(|c)            }
-method default_case_tolerant     { 1                                     }
+method default_case_tolerant     { True                                     }
 
 method file_name_is_absolute ($path) {
 	# As of right now, this returns 2 if the path is absolute with a
@@ -105,8 +105,11 @@ method catpath($volume is copy, $directory, $file) {
 	   and $volume !~~ /^<$driveletter>/
 	   and $volume !~~ /<$slash> $/
 	   and $directory !~~ /^ <$slash>/
-		{ $volume ~ '\\' ~ $directory ~ $file; }
-	else 	{ $volume ~        $directory ~ $file; }
+		{ $volume ~= '\\' }
+	if $file ne '' and $directory ne ''
+	   and $directory !~~ /<$slash> $/
+		{ $volume ~ $directory ~ '\\' ~ $file; }
+	else 	{ $volume ~ $directory     ~    $file; }
 }
 
 #method abs2rel(|c)               { ::($module).abs2rel(|c)               }
@@ -161,7 +164,7 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 }
 
 
-method rel2abs ($path, $base?) {
+method rel2abs ($path is copy, $base? is copy) {
 
 	my $is_abs = self.file_name_is_absolute($path);
 
@@ -170,11 +173,13 @@ method rel2abs ($path, $base?) {
 
 	if $is_abs == 1 {
 		# It's missing a volume, add one
-		my $vol = self.splitpath($*CWD)[0];
+		my $vol;
+		$vol = self.splitpath($base)[0] if $base.defined;
+		$vol ||= self.splitpath($*CWD)[0];
 		return self.canonpath( $vol ~ $path );
 	}
 
-	if !defined $base || $base eq '' {
+	if $base.not || $base eq '' {
 		# TODO: implement _getdcwd call ( Windows maintains separate CWD for each volume )
 		#$base = Cwd::getdcwd( ($self->splitpath( $path ))[0] ) if defined &Cwd::getdcwd ;
 		#$base = $*CWD unless defined $base ;
