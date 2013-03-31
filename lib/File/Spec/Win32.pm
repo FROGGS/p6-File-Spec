@@ -161,7 +161,7 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 }
 
 
-method rel2abs ($path, $base?) {
+method rel2abs ($path is copy, $base? is copy) {
 
 	my $is_abs = self.file_name_is_absolute($path);
 
@@ -174,7 +174,7 @@ method rel2abs ($path, $base?) {
 		return self.canonpath( $vol ~ $path );
 	}
 
-	if !defined $base || $base eq '' {
+	if $base.not || $base eq '' {
 		# TODO: implement _getdcwd call ( Windows maintains separate CWD for each volume )
 		#$base = Cwd::getdcwd( ($self->splitpath( $path ))[0] ) if defined &Cwd::getdcwd ;
 		#$base = $*CWD unless defined $base ;

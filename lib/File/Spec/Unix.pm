@@ -63,9 +63,9 @@ method devnull { '/dev/null' }
 method rootdir { '/' }
 
 method _tmpdir( *@dirlist ) {
-	my $tmpdir = @dirlist.first({ .defined && .IO.d && .IO.w })
+	my $tmpdir = @dirlist.first: { .defined && .IO.d && .IO.w }
 		or fail "No viable candidates for a temporary directory found";
-	$tmpdir = self.canonpath( $tmpdir );
+	self.canonpath( $tmpdir );
 }
 
 method tmpdir {
