@@ -171,7 +171,7 @@ is $win32.curdir,  '.',   'curdir is "."';
 is $win32.devnull, 'nul', 'devnull is nul';
 is $win32.rootdir, '\\',  'rootdir is "\\"';
 is $win32.updir,   '..',  'updir is ".."';
-
+is $win32.default_case_tolerant, True, 'default_case_tolerant is true';
 
 
 if $*OS !~~ any(<MSWin32 NetWare symbian>) {

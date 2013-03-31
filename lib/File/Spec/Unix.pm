@@ -85,7 +85,7 @@ method no_upwards( *@paths ) {
 	return @no_upwards;
 }
 
-method default_case_tolerant { 0 }
+method default_case_tolerant { False }
 
 method file_name_is_absolute( $file ) {
 	$file ~~ m/^\//

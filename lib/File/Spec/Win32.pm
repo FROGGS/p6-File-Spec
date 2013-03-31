@@ -51,7 +51,7 @@ method tmpdir {
 method updir                     { ::($module).updir()                   }
 method no_upwards(|c)            { ::($module).no_upwards(|c)            }
 #method case_tolerant(|c)         { ::($module).case_tolerant(|c)            }
-method default_case_tolerant     { 1                                     }
+method default_case_tolerant     { True                                     }
 
 method file_name_is_absolute ($path) {
 	# As of right now, this returns 2 if the path is absolute with a
