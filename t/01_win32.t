@@ -4,7 +4,7 @@ use Test;
 use File::Spec;
 use File::Spec::Win32;
 
-plan 118;
+plan 126;
 my $win32 = File::Spec::Win32;
 
 say "# File::Spec::Win32";
@@ -30,6 +30,18 @@ my @canonpath =
 	'd1/../foo',      'd1\\..\\foo';
 for @canonpath -> $in, $out {
 	is $win32.canonpath($in), $out, "canonpath: '$in' -> '$out'";
+}
+
+say "# splitdir tests";
+my @splitdir = 
+	'',              '',
+	'\\d1/d2\\d3/',  ',d1,d2,d3,',
+	'd1/d2\\d3/',    'd1,d2,d3,',
+	'\\d1/d2\\d3',   ',d1,d2,d3',
+	'd1/d2\\d3',     'd1,d2,d3';
+
+for @splitdir -> $in, $out {
+	is $win32.splitdir(|$in).join(','), $out, "splitdir: '$in' -> '$out'"
 }
 
 say "# catdir tests";
@@ -95,20 +107,6 @@ for @splitpath -> $in, $out {
 	is $win32.splitpath(|$in).join(','), $out, "splitpath: {$in.perl} -> '$out'"
 }
 
-
-say "# splitdir tests";
-my @splitdir = 
-	'',              '',
-	'\\d1/d2\\d3/',  ',d1,d2,d3,',
-	'd1/d2\\d3/',    'd1,d2,d3,',
-	'\\d1/d2\\d3',   ',d1,d2,d3',
-	'd1/d2\\d3',     'd1,d2,d3';
-
-for @splitdir -> $in, $out {
-	is $win32.splitdir(|$in).join(','), $out, "splitdir: '$in' -> '$out'"
-}
-
-
 say "# catpath tests";
 my @catpath = 
 	('','','file').item,                            'file',
@@ -133,6 +131,19 @@ my @catpath =
 
 for @catpath -> $in, $out {
 	is $win32.catpath(|$in), $out, "catpath: {$in.perl} -> '$out'"
+}
+
+my @catfile = 
+	('a','b','c').item,        'a\\b\\c',
+	('a','b','.\\c').item,      'a\\b\\c' ,
+	('.\\a','b','c').item,      'a\\b\\c' ,
+	('c').item,                'c',
+	('.\\c').item,              'c',
+	('a/..','../b').item,       '..\\b',
+	('A:', 'foo').item,         'A:\\foo';
+
+for @catfile -> $in, $out {
+	is $win32.catfile(|$in), $out, "catfile: {$in.perl} -> '$out'"
 }
 
 
