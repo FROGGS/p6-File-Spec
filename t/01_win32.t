@@ -4,7 +4,7 @@ use Test;
 use File::Spec;
 use File::Spec::Win32;
 
-plan 126;
+plan 136;
 my $win32 = File::Spec::Win32;
 
 say "# File::Spec::Win32";
@@ -125,6 +125,7 @@ my @catpath =
 	('C:','../d2\\d3/','file').item,                'C:../d2\\d3/file',
 	('','\\../..\\d1/','').item,                    '\\../..\\d1/',
 	('','\\./.\\d1/','').item,                      '\\./.\\d1/',
+	('C:','foo','bar').item,                        'C:foo\\bar',
 	('\\\\node\\share','\\d1/d2\\d3/','').item,     '\\\\node\\share\\d1/d2\\d3/',
 	('\\\\node\\share','\\d1/d2\\d3/','file').item, '\\\\node\\share\\d1/d2\\d3/file',
 	('\\\\node\\share','\\d1/d2\\','file').item,    '\\\\node\\share\\d1/d2\\file';
@@ -139,7 +140,7 @@ my @catfile =
 	('.\\a','b','c').item,      'a\\b\\c' ,
 	('c').item,                'c',
 	('.\\c').item,              'c',
-	('a/..','../b').item,       '..\\b',
+	('a/..','../b').item,       'a\\..\\..\\b',
 	('A:', 'foo').item,         'A:\\foo';
 
 for @catfile -> $in, $out {
@@ -165,9 +166,9 @@ my @abs2rel =
 	('A:/t1/t2/t3','B:/t1/t2/t3').item,     'A:\\t1\\t2\\t3',
 	('A:/t1/t2/t3/t4','B:/t1/t2/t3').item,  'A:\\t1\\t2\\t3\\t4',
 	('E:/foo/bar/baz').item,            'E:\\foo\\bar\\baz',
-	#('C:/one/two/three').item,          'three',
 	('C:\\Windows\\System32', 'C:\\').item,  'Windows\System32',
 	('\\\\computer2\\share3\\foo.txt', '\\\\computer2\\share3').item,  'foo.txt';
+	#('C:/one/two/three').item,          'three',
 	#('../t4','/t1/t2/t3').item,         '..\\..\\..\\one\\t4',  # Uses _cwd()
 	#('C:\\one\\two\\t\\asd1\\', 't\\asd\\').item, '..\\asd1',
 	#('\\one\\two', 'A:\\foo').item,     'C:\\one\\two';
@@ -176,13 +177,29 @@ for @abs2rel -> $in, $out {
 	is $win32.abs2rel(|$in), $out, "abs2rel: {$in.perl} -> '$out'"
 }
 
+my @rel2abs = 
+	$('temp','C:/'),                       'C:\\temp',
+	$('temp','C:/a'),                      'C:\\a\\temp',
+	$('temp','C:/a/'),                     'C:\\a\\temp',
+	$('../','C:/'),                        'C:\\',
+	$('../','C:/a'),                       'C:\\a\\..',
+	$('\\foo','C:/a'),                     'C:\\foo',
+	$('temp','//prague_main/work/'),       '\\\\prague_main\\work\\temp',
+	$('../temp','//prague_main/work/'),    '\\\\prague_main\\work\\temp',
+	$('temp','//prague_main/work'),        '\\\\prague_main\\work\\temp';
+	#$('../','//prague_main/work'),         '\\\\prague_main\\work';
+	#$('D:foo.txt'),                        'D:\\alpha\\beta\\foo.txt';
+
+for @rel2abs -> $in, $out {
+	is $win32.rel2abs(|$in), $out, "rel2abs: {$in.perl} -> '$out'"
+}
 
 
 is $win32.curdir,  '.',   'curdir is "."';
 is $win32.devnull, 'nul', 'devnull is nul';
 is $win32.rootdir, '\\',  'rootdir is "\\"';
 is $win32.updir,   '..',  'updir is ".."';
-is $win32.default_case_tolerant, True, 'default_case_tolerant is true';
+is $win32.default_case_tolerant, True, 'default_case_tolerant is True';
 
 
 if $*OS !~~ any(<MSWin32 NetWare symbian>) {
@@ -196,10 +213,7 @@ else {
 	#no_upwards
 	is File::Spec.case_tolerant, 1, 'case_tolerant is 1';
 
-	#file_name_is_absolute
 	#join
-	#catpath
-	#rel2abs
 
 }
 
