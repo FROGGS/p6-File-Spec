@@ -105,8 +105,11 @@ method catpath($volume is copy, $directory, $file) {
 	   and $volume !~~ /^<$driveletter>/
 	   and $volume !~~ /<$slash> $/
 	   and $directory !~~ /^ <$slash>/
-		{ $volume ~ '\\' ~ $directory ~ $file; }
-	else 	{ $volume ~        $directory ~ $file; }
+		{ $volume ~= '\\' }
+	if $file ne '' and $directory ne ''
+	   and $directory !~~ /<$slash> $/
+		{ $volume ~ $directory ~ '\\' ~ $file; }
+	else 	{ $volume ~ $directory     ~    $file; }
 }
 
 #method abs2rel(|c)               { ::($module).abs2rel(|c)               }
@@ -170,7 +173,9 @@ method rel2abs ($path is copy, $base? is copy) {
 
 	if $is_abs == 1 {
 		# It's missing a volume, add one
-		my $vol = self.splitpath($*CWD)[0];
+		my $vol;
+		$vol = self.splitpath($base)[0] if $base.defined;
+		$vol ||= self.splitpath($*CWD)[0];
 		return self.canonpath( $vol ~ $path );
 	}
 
