@@ -3,17 +3,13 @@ my $module;
 has $!OS;
 my %module = (
 	'MacOS'   => 'Mac',
-	'MSWin32' => 'Win32',
-	'os2'     => 'OS2',
+	<MSWin32 os2 dos NetWare symbian> »=>» 'Win32',
 	'VMS'     => 'VMS',
 	'epoc'    => 'Epoc',
-	'NetWare' => 'Win32', # Yes, File::Spec::Win32 works on NetWare.
-	'symbian' => 'Win32', # Yes, File::Spec::Win32 works on symbian.
-	'dos'     => 'OS2',   # Yes, File::Spec::OS2 works on DJGPP.
 	'cygwin'  => 'Cygwin',
 	# in case someone passes a module name instead of an OS string
 	#  map it to themselves
-	<Unix Mac Win32 OS2 Epoc Cygwin> »xx» 2
+	<Unix Mac Win32 Epoc Cygwin> »xx» 2
 );
 
 # preload $*OS, so that current OS works without constructor

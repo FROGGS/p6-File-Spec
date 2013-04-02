@@ -1,7 +1,9 @@
-class File::Spec::Win32;
+use v6;
+use File::Spec::Unix;
+class File::Spec::Win32 is File::Spec::Unix;
 
 my $module = "File::Spec::Unix";
-require $module;
+#require $module;
 
 # Some regexes we use for path splitting
 my $driveletter = regex { <[a..zA..Z]> ':' }
@@ -112,7 +114,6 @@ method catpath($volume is copy, $directory, $file) {
 	else 	{ $volume ~ $directory     ~    $file; }
 }
 
-#method abs2rel(|c)               { ::($module).abs2rel(|c)               }
 method abs2rel( $path is copy, $base is copy = Str ) {
 	$base = $*CWD unless $base.defined && $base.chars;
 
@@ -171,7 +172,7 @@ method rel2abs ($path is copy, $base? is copy) {
 	# Check for volume (should probably document the '2' thing...)
 	return self.canonpath( $path ) if $is_abs == 2;
 
-	if $is_abs == 1 {
+	if $is_abs {
 		# It's missing a volume, add one
 		my $vol;
 		$vol = self.splitpath($base)[0] if $base.defined;

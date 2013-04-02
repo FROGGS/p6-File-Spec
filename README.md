@@ -19,8 +19,8 @@ Methods (current state):
 	updir                  done  done  done  done        done  done
 	no_upwards             done              done        done  done
 	case_tolerant          done  done  done  done  done  done  done
-	file_name_is_absolute  done  done        done        done  done
-	path                   done              done        done  done
+	file_name_is_absolute  done  done  done  done        done  done
+	path                   done        done  done        done  done
 	join                   done              done        done  done
 	splitpath              done  done        done        done  done
 	splitdir               done        done  done        done  done
