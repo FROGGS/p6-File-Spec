@@ -115,7 +115,7 @@ method splitpath( $path, $nofile ) {
 		$directory = ~$0;
 		$file      = ~$1;
 	}
-	$directory ~~ s/<?after .> '/'+ $ //; 
+	$directory ~~ s/<?after .> '/'+ $ //; #/
 
 	return ( $volume, $directory, $file );
 }
@@ -207,5 +207,62 @@ method rel2abs( $path is copy, $base is copy = Str ) {
 	}
 
 	return self.canonpath( $path )
+}
+
+method case_tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
+	# This code should be platform independent, but feel free to add local override
+
+	$path.path.e or fail "Invalid path given";
+	my @dirs = self.splitdir(self.rel2abs($path));
+	my @searchabledirs;
+
+	# try looking at each component of $path to see if has letters
+	loop (my $i = +@dirs; $i--; $i <= 0) {
+		my $p = self.catdir(@dirs[0..$i]);
+		push(@searchabledirs, $p) if $p.path.d;
+
+		last if $p.IO.l;
+		next unless @dirs[$i] ~~ /<.alpha>/;
+
+		return self.case_tolerant_folder: @dirs[0..($i-1)], @dirs[$i];
+	}
+
+	# If nothing in $path contains a letter, search for nearby files, including up the tree
+	# This doesn't actually look recursively; don't want to add File::Find as a dependency
+	for @searchabledirs -> $d {
+		my @filelist = $d.path.contents.grep(/<.alpha>/);
+		next unless @filelist.elems;
+
+		# anything with <alpha> will do
+		return self.case_tolerant_folder: $d, @filelist[0];
+	}
+
+	# If we couldn't find anything suitable, try writing a test file
+	if $write_ok {
+		for @searchabledirs.grep({.path.w}) -> $d {
+			my $filelc = self.catdir( $d, 'filespec.tmp');  #because 8.3 filesystems...
+			my $fileuc = self.catdir( $d, 'FILESPEC.TMP');
+			if $filelc.path.e or $fileuc.path.e { die "Wait, where did the file matching <alpha> come from??"; }
+			try {
+				spurt $filelc, 'temporary test file for p6 File::Spec, feel free to delete';
+				my $result = $fileuc.path.e;
+				unlink $filelc;
+				return $result;
+			}
+			CATCH { unlink $filelc unless $filelc.path.e; }
+		}
+	}
+
+	# Okay, we don't have write access... give up and just return the platform default
+	return self.default_case_tolerant;
+
+}
+
+method case_tolerant_folder( \updirs, $curdir ) {
+	return False unless self.catdir( |updirs, $curdir.uc).path.e
+			 && self.catdir( |updirs, $curdir.lc).path.e;
+	return +self.catdir(|updirs).path.contents.grep(/:i ^ $curdir $/) <= 1;
+	# this could be faster by comparing inodes of .uc and .lc
+	# but we can't guarantee POSIXness of every platform that calls this
 }
 
