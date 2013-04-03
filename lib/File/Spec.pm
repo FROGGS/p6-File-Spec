@@ -1,6 +1,5 @@
 class File::Spec;
 my $module;
-has $!OS;
 my %module = (
 	'MacOS'   => 'Mac',
 	<MSWin32 os2 dos NetWare symbian> »=>» 'Win32',
@@ -40,7 +39,7 @@ method default_case_tolerant                { ::($module).default_case_tolerant(
 method file_name_is_absolute( $file )       { ::($module).file_name_is_absolute( $file )       }
 method path                                 { ::($module).path()                               }
 method join( *@parts )                      { ::($module).join( @parts )                       }
-method splitpath( $path, $no_file = 0 )     { ::($module).splitpath( $path, $no_file )         }
+method splitpath( $path, $no_file = False ) { ::($module).splitpath( $path, $no_file )         }
 method splitdir( $path )                    { ::($module).splitdir( $path )                    }
 method catpath( $volume, $directory, $file) { ::($module).catpath( $volume, $directory, $file) }
 method abs2rel( $path, $base = Str )        { ::($module).abs2rel( $path, $base )              }

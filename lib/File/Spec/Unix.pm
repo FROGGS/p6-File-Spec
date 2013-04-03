@@ -104,7 +104,7 @@ method join( *@parts ) {
 	self.catfile( @parts )
 }
 
-method splitpath( $path, $nofile ) {
+method splitpath( $path, $nofile = False ) {
 	my ( $volume, $directory, $file ) = ( '', '', '' );
 
 	if $nofile {
