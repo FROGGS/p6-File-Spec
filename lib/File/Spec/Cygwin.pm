@@ -56,7 +56,7 @@ method tmpdir {
 
 #| Paths might have a volume, so we use Win32 splitpath and catpath instead
 method splitpath ( $path, $nofile = False )      { File::Spec::Win32.splitpath( $path, $nofile ) }
-method catpath (|c)           { self.canonpath( File::Spec::Win32.catpath(|c) ) }
+method catpath (|c)           { File::Spec::Win32.catpath(|c).subst(:global, '\\', '/') }
 
 #method catfile               { ::($module).catfile()               }
 #method curdir                { ::($module).curdir()                }
