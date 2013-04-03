@@ -15,12 +15,13 @@ sub _can_ok( $method ) {
 	ok File::Spec.^methods.first( $method ), "we can call File::Spec.$method"
 }
 
+my $foreign;
 ok my $foreignOS = ($*OS eq 'MacOS' ?? 'unix' !! 'MacOS'),
 	"$foreignOS is not your operating system";
-ok my $foreign = File::Spec.new(OS => $foreignOS),
+lives_ok { $foreign = File::Spec.os($foreignOS) },
 	"we can make $foreignOS File::Spec objects anyway";
-ok $foreign.OS_module eq ($*OS eq 'MacOS' ?? 'File::Spec::Unix' !! 'File::Spec::Mac'),
-	"correct module {$foreign.OS_module} loaded";
-ok $foreign.^methods.first( 'canonpath' ), "we can call methods in {$foreign.OS_module}";
+ok $foreign.^name eq ($*OS eq 'MacOS' ?? 'File::Spec::Unix' !! 'File::Spec::Mac'),
+	"correct module {$foreign.^name} loaded";
+ok $foreign.^methods.first( 'canonpath' ), "we can call methods in {$foreign.^name}";
 
 	
