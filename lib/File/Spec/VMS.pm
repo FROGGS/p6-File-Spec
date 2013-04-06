@@ -4,6 +4,10 @@ class File::Spec::VMS is File::Spec::Unix;
 my $module = "File::Spec::Unix";
 #require $module;
 my $unix_report = _unix_rpt;
+my $dir_rx = regex {   '[' ~ ']'  <-[ \] ]>*
+                     | '<' ~ '>'  <-[ \< ]>*
+                   };
+
 
 sub _unix_rpt {
 	# VMS::Feature is supposedly the "preferred" way of looking this up
@@ -38,6 +42,92 @@ method tmpdir {
 	            !! self._tmpdir( 'sys$scratch:', %*ENV<TMPDIR> );
 }
 
+method splitpath ($path, $nofile = False) {
+	my ($dev, $dir, $file) = ('','','');
+	#my $vmsify_path = vmsify($path);
+	#VMSify is NYI, so...
+	my $vmsify_path = $path;
+
+	if $nofile {
+		#vmsify('d1/d2/d3') returns '[.d1.d2]d3'
+		#vmsify('/d1/d2/d3') returns 'd1:[d2]d3'
+		if $vmsify_path ~~ /^ (.*) ']' (.+) $/ {
+		    $vmsify_path = $1 ~ '.' ~ $2 ~ ']';
+		}
+		$vmsify_path ~~ /^ (.+ ':')?(.*) $/;
+		$dir = ~$1 // ''; # dir can be '0'
+		return (~$0 ,$dir, '');
+	}
+	else {
+		$vmsify_path ~~ /^ (.+ ':')? ( <$dir_rx> )? (.*) $/;
+		return (~$0 || '', ~$1 || '', ~$2);
+	}
+}
+
+method path-components ($path, $nofile = False) {
+	#really, this is function is more proof-of-concept than anything workable.
+	# we need VMSify to do a good job here
+	my ($dev, $dir, $file) = ('','','');
+	#my $vmsify_path = vmsify($path);
+	#VMSify is NYI, so...
+	my $vmsify_path = $path;
+
+	if 0 {
+		#vmsify('d1/d2/d3') returns '[.d1.d2]d3'
+		#vmsify('/d1/d2/d3') returns 'd1:[d2]d3'
+		if $vmsify_path ~~ /^ (.*) ']' (.+) $/ {
+		    $vmsify_path = $1 ~ '.' ~ $2 ~ ']';
+		}
+		$vmsify_path ~~ /^ (.+ ':')?(.*) $/;
+		$dir = ~$1 // ''; # dir can be '0'
+		return (~$0 ,$dir, '');
+	}
+
+	$vmsify_path ~~ /^ (.+ ':')? ( <$dir_rx> )? (.*) $/;
+	($dev, $dir, $file) = (~$0 , ~$1 , ~$2);
+	if $dir ne '' and $file eq '' {
+		#should really do splitdir/catdir instead...
+		my @chunks = $dir.split('.');
+		if +@chunks > 1 {
+			$file = '[' ~ @chunks.pop;
+			$dir =   @chunks.join('.') ~ ']';
+		}
+		else {
+			$file = $dir;
+			$dir = '';
+		}
+	}
+	return ($dev, $dir, $file);
+}
+
+
+method catpath ( $dev is copy, $dir is copy, $file ) {
+    
+	# We look for a volume in $dev, then in $dir, but not both
+	my ($dir_volume, $dir_dir, $dir_file) = self.splitpath($dir);
+	$dev = $dir_volume unless $dev ne '';
+	$dir = $dir_file.chars ?? self.catfile($dir_dir, $dir_file) !! $dir_dir;
+
+	if $dev ~~ /^ '/+' ( <-[/]>+ )/    { $dev = "$1:"; }  #'
+	else { $dev ~= ':' unless $dev eq '' or $dev ~~ /':' $/; }
+	if ($dev.chars or $dir.chars) {
+						
+		$dir = "[$dir]" unless $dir ~~ /<!after '^'> <[ "[</" ]>/;  #"
+		#$dir = vmspath($dir);
+	}
+	$dir = '' if $dev.chars && $dir eq any('[]', '<>');
+	"$dev$dir$file";
+}
+
+method join-path ($dev, $dirname is copy, $basename is copy) {
+	if $dirname ne '' and $basename ~~ /^ '['/ {
+		$basename ~~ s/^ '['//;
+		$dirname  ~~ s/']' $/.$basename/;
+		$basename = '';
+	}
+	self.catpath($dev, $dirname, $basename);
+}
+
 method canonpath             { ::($module).canonpath()             }
 method catdir                { ::($module).catdir()                }
 method catfile               { ::($module).catfile()               }
@@ -49,8 +139,8 @@ method no_upwards            { ::($module).no_upwards()            }
 method case_tolerant         { True                                }
 method default_case_tolerant { True                                }
 method join                  { ::($module).join()                  }
-method splitpath             { ::($module).splitpath()             }
+#method splitpath             { ::($module).splitpath()             }
 method splitdir              { ::($module).splitdir()              }
-method catpath               { ::($module).catpath()               }
+#method catpath               { ::($module).catpath()               }
 method abs2rel               { ::($module).abs2rel()               }
 method rel2abs               { ::($module).rel2abs()               }
