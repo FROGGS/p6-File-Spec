@@ -54,13 +54,11 @@ method catfile( *@parts is copy ) {
 	return $dir ~ $file;
 }
 
-method curdir {
-	'.'
-}
-
-method devnull { '/dev/null' }
-
+method curdir {	'.'  }
+method updir  { '..' }
 method rootdir { '/' }
+method devnull { '/dev/null' }
+method default_case_tolerant { False }
 
 method _tmpdir( *@dirlist ) {
 	my $tmpdir = @dirlist.first: { .defined && .IO.d && .IO.w }
@@ -78,14 +76,11 @@ method tmpdir {
 	                 );
 }
 
-method updir { '..' }
 
 method no_upwards( *@paths ) {
 	my @no_upwards = grep { $_ !~~ /^[\.|\.\.]$/ }, @paths;
 	return @no_upwards;
 }
-
-method default_case_tolerant { False }
 
 method file_name_is_absolute( $file ) {
 	$file ~~ m/^\//
@@ -115,10 +110,24 @@ method splitpath( $path, $nofile = False ) {
 		$directory = ~$0;
 		$file      = ~$1;
 	}
+
+	return ( $volume, $directory, $file );
+}
+
+method path-components ( $path is copy ) {
+	my ( $volume, $directory, $file ) = ( '', '', '' );
+
+	$path      ~~ s/<?after .> '/'+ $ //;
+	$path      ~~ m/^ ( [ .* \/ ]? ) (<-[\/]>*) /;
+	$directory = ~$0;
+	$file      = ~$1;
 	$directory ~~ s/<?after .> '/'+ $ //; #/
 
 	return ( $volume, $directory, $file );
 }
+
+
+method join-path (|c) { self.catpath(|c) }
 
 method splitdir( $path ) {
 	return $path.split( /\// )
@@ -212,17 +221,17 @@ method rel2abs( $path is copy, $base is copy = Str ) {
 method case_tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
 	# This code should be platform independent, but feel free to add local override
 
-	$path.path.e or fail "Invalid path given";
+	$path.IO.e or fail "Invalid path given";
 	my @dirs = self.splitdir(self.rel2abs($path));
 	my @searchabledirs;
 
 	# try looking at each component of $path to see if has letters
 	loop (my $i = +@dirs; $i--; $i <= 0) {
 		my $p = self.catdir(@dirs[0..$i]);
-		push(@searchabledirs, $p) if $p.path.d;
+		push(@searchabledirs, $p) if $p.IO.d;
 
 		last if $p.IO.l;
-		next unless @dirs[$i] ~~ /<.alpha>/;
+		next unless @dirs[$i] ~~ /<+alpha-[_]>/;
 
 		return self.case_tolerant_folder: @dirs[0..($i-1)], @dirs[$i];
 	}
@@ -230,7 +239,7 @@ method case_tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
 	# If nothing in $path contains a letter, search for nearby files, including up the tree
 	# This doesn't actually look recursively; don't want to add File::Find as a dependency
 	for @searchabledirs -> $d {
-		my @filelist = $d.path.contents.grep(/<.alpha>/);
+		my @filelist = dir($d).grep(/<+alpha-[_]>/);
 		next unless @filelist.elems;
 
 		# anything with <alpha> will do
@@ -239,17 +248,17 @@ method case_tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
 
 	# If we couldn't find anything suitable, try writing a test file
 	if $write_ok {
-		for @searchabledirs.grep({.path.w}) -> $d {
+		for @searchabledirs.grep({.IO.w}) -> $d {
 			my $filelc = self.catdir( $d, 'filespec.tmp');  #because 8.3 filesystems...
 			my $fileuc = self.catdir( $d, 'FILESPEC.TMP');
-			if $filelc.path.e or $fileuc.path.e { die "Wait, where did the file matching <alpha> come from??"; }
+			if $filelc.IO.e or $fileuc.IO.e { die "Wait, where did the file matching <alpha> come from??"; }
 			try {
 				spurt $filelc, 'temporary test file for p6 File::Spec, feel free to delete';
-				my $result = $fileuc.path.e;
+				my $result = $fileuc.IO.e;
 				unlink $filelc;
 				return $result;
 			}
-			CATCH { unlink $filelc unless $filelc.path.e; }
+			CATCH { unlink $filelc if $filelc.IO.e; }
 		}
 	}
 
@@ -259,9 +268,9 @@ method case_tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
 }
 
 method case_tolerant_folder( \updirs, $curdir ) {
-	return False unless self.catdir( |updirs, $curdir.uc).path.e
-			 && self.catdir( |updirs, $curdir.lc).path.e;
-	return +self.catdir(|updirs).path.contents.grep(/:i ^ $curdir $/) <= 1;
+	return False unless self.catdir( |updirs, $curdir.uc).IO.e
+			 && self.catdir( |updirs, $curdir.lc).IO.e;
+	return +dir(self.catdir(|updirs)).grep(/:i ^ $curdir $/) <= 1;
 	# this could be faster by comparing inodes of .uc and .lc
 	# but we can't guarantee POSIXness of every platform that calls this
 }

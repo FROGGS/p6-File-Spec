@@ -6,7 +6,7 @@ my $module = "File::Spec::Unix";
 #require $module;
 
 # Some regexes we use for path splitting
-my $driveletter = regex { <[a..zA..Z]> ':' }
+my $driveletter = regex { <[A..Z a..z]> ':' }
 my $slash	= regex { '/' | '\\' }
 my $UNCpath     = regex { [<$slash> ** 2] <-[\\\/]>+  <$slash>  [<-[\\\/]>+ | $] }
 my $volume_rx   = regex { $<driveletter>=<$driveletter> | $<UNCpath>=<$UNCpath> }
@@ -97,6 +97,27 @@ method splitpath($path as Str, $nofile as Bool = False) {
 
 	return ($volume,$directory,$file);
 }
+
+method path-components($path as Str is copy) { 
+
+	my ($volume, $directory, $file) = ('','','');
+	$path ~~ s[ <$slash>+ $] = ''                       #=
+		unless $path ~~ /^ <$driveletter>? <$slash>+ $/;
+
+	$path ~~ 
+	    m/^ ( <$volume_rx> ? )
+		( [ .* <$slash> ]? )
+		(.*)
+	     /;
+	$volume    = ~$0;
+	$directory = ~$1;
+	$file      = ~$2;
+        $directory ~~ s/ <?after .> <$slash>+ $//;
+
+	return ($volume,$directory,$file);
+}
+
+method join-path (|c) { self.catpath(|c)  }
 
 method splitdir($dir)            { $dir.split($slash)                    }
 method catpath($volume is copy, $directory, $file) {
@@ -219,7 +240,6 @@ sub canon_cat ( $first is copy, *@rest ) {
 	my $volume = ~$volumematch[0];
 	$first =     ~$volumematch[1];
 
-	#$volume ~~ s:g/ '/' /\\/;     #::
 	$volume.=subst(:g, '/', '\\');
 	if $volume ~~ /^<$driveletter>/ {
 		$volume.=uc;

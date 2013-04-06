@@ -57,6 +57,8 @@ method tmpdir {
 #| Paths might have a volume, so we use Win32 splitpath and catpath instead
 method splitpath ( $path, $nofile = False )      { File::Spec::Win32.splitpath( $path, $nofile ) }
 method catpath (|c)           { File::Spec::Win32.catpath(|c).subst(:global, '\\', '/') }
+method path-components($path) { File::Spec::Win32.path-components($path) }
+method join-path (|c)         { self.catpath(|c)                    }
 
 #method catfile               { ::($module).catfile()               }
 #method curdir                { ::($module).curdir()                }
@@ -73,4 +75,3 @@ method default_case_tolerant { True                                }
 #method catpath               { ::($module).catpath()               }
 #method abs2rel               { ::($module).abs2rel()               }
 #method rel2abs               { ::($module).rel2abs()               }
-say "end";
