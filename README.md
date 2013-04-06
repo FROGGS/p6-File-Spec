@@ -65,7 +65,7 @@ The os method takes a single argument, an operating system string, and returns a
 	my $windows_spec = File::Spec.os('MSWin32');
 		#returns File::Spec::Win32
 	say File::Spec.os('Win32').canonpath('C:\\foo\\.\\bar\\');
-		# prints "C:\\foo\\bar"
+		# prints "C:\foo\bar"
 
 The parameter can be either an operating system string, or the last part of the name of a subclass ('Win32', 'Mac').  The default is `$*OS`, which gives you the same subclass that File::Spec already uses for your system.
 
@@ -94,3 +94,13 @@ A close relative of `.catpath`, this function takes volume, directory and basena
 Directory separators are inserted if necessary.  Under Unix, $volume is ignored, and only directory and basename are concatenated.  On other OSes, $volume is significant.
 
 This method is the inverse of `.path-components`; the results can be passed to it to get the volume, dirname, and basename portions back.
+
+### Comparison of path-components and splitpath
+
+	OS    Path       splitpath               path-components
+	linux /a/b/c     ("", "/a/b/", "c")      ("", "/a/b", "c")
+	linux /a/b//c/   ("", "/a/b//c/", "")    ("", "/a/b", "c")
+	linux /a/b/.     ("", "/a/b/.", "")      ("", "/a/b", ".")
+	win32 C:\a\b\    ("C:", "\\a\\b\\", "")  ("C:", "\\a", "b")
+        VMS   A:[b.c]    ("A:", "[b.c]", "")     ("A:", "[b]", "[c]")
+
