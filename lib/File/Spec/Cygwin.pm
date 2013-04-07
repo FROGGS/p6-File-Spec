@@ -35,16 +35,16 @@ method catdir ( *@paths ) {
 
 
 #| True is returned if the file name begins with C<drive_letter:/>,
-#| and if not, File::Spec::Unix.file_name_is_absolute is called.
-sub file_name_is_absolute ($file) {
+#| and if not, File::Spec::Unix.file-name-is-absolute is called.
+sub file-name-is-absolute ($file) {
     return True if $file ~~ m★ ^ [<[A..Z a..z]>:]?  <[\\/]>★; # C:/test
-    File::Spec::Unix.file_name_is_absolute($file);
+    File::Spec::Unix.file-name-is-absolute($file);
 }
 
 method tmpdir {
     state $tmpdir;
     return $tmpdir if defined $tmpdir;
-    $tmpdir = File::Spec::Unix._tmpdir(
+    $tmpdir = File::Spec::Unix._firsttmpdir(
 		 %*ENV<TMPDIR>,
 		 "/tmp",
 		 %*ENV<TMP>,
@@ -57,6 +57,8 @@ method tmpdir {
 #| Paths might have a volume, so we use Win32 splitpath and catpath instead
 method splitpath ( $path, $nofile = False )      { File::Spec::Win32.splitpath( $path, $nofile ) }
 method catpath (|c)           { File::Spec::Win32.catpath(|c).subst(:global, '\\', '/') }
+method path-components($path) { File::Spec::Win32.path-components($path) }
+method join-path (|c)         { self.catpath(|c)                    }
 
 #method catfile               { ::($module).catfile()               }
 #method curdir                { ::($module).curdir()                }
@@ -65,7 +67,7 @@ method catpath (|c)           { File::Spec::Win32.catpath(|c).subst(:global, '\\
 #method updir                 { ::($module).updir()                 }
 #method no_upwards            { ::($module).no_upwards()            }
 #method case_tolerant         { ::($module).case_tolerant()         }
-method default_case_tolerant { True                                }
+method default-case-tolerant { True                                }
 #method path                  { ::($module).path()                  }
 #method join                  { ::($module).join()                  }
 #method splitpath             { ::($module).splitpath()             }
@@ -73,4 +75,3 @@ method default_case_tolerant { True                                }
 #method catpath               { ::($module).catpath()               }
 #method abs2rel               { ::($module).abs2rel()               }
 #method rel2abs               { ::($module).rel2abs()               }
-say "end";

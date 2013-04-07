@@ -4,8 +4,8 @@ class File::Spec::Epoc is File::Spec::Unix;
 
 my $module = "File::Spec::Unix";
 
-method default_case_tolerant { True }
-method case_tolerant         { True }
+method default-case-tolerant { True }
+method case-tolerant         { True }
 
 method canonpath ($path is copy) {
     return unless defined $path;

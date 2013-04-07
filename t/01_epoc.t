@@ -19,7 +19,7 @@ for @canonpath -> $in, $out {
 
 is $epoc.curdir,  '.',   'curdir is "."';
 is $epoc.updir,   '..',  'updir is ".."';
-is $epoc.case_tolerant, True, 'default_case_tolerant is True';
-is $epoc.default_case_tolerant, True, 'default_case_tolerant is True';
+is $epoc.case-tolerant, True, 'case-tolerant is True';
+is $epoc.default-case-tolerant, True, 'default-case-tolerant is True';
 
 done;

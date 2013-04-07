@@ -54,15 +54,13 @@ method catfile( *@parts is copy ) {
 	return $dir ~ $file;
 }
 
-method curdir {
-	'.'
-}
-
-method devnull { '/dev/null' }
-
+method curdir {	'.'  }
+method updir  { '..' }
 method rootdir { '/' }
+method devnull { '/dev/null' }
+method default-case-tolerant { False }
 
-method _tmpdir( *@dirlist ) {
+method _firsttmpdir( *@dirlist ) {
 	my $tmpdir = @dirlist.first: { .defined && .IO.d && .IO.w }
 		or fail "No viable candidates for a temporary directory found";
 	self.canonpath( $tmpdir );
@@ -71,24 +69,21 @@ method _tmpdir( *@dirlist ) {
 method tmpdir {
 	state $tmpdir;
 	return $tmpdir if $tmpdir.defined;
-	return $tmpdir = self._tmpdir(
+	return $tmpdir = self._firsttmpdir(
 				%*ENV{'TMPDIR'},
 				'/tmp',
 				self.curdir
 	                 );
 }
 
-method updir { '..' }
 
-method no_upwards( *@paths ) {
+method no-upwards( *@paths ) {
 	my @no_upwards = grep { $_ !~~ /^[\.|\.\.]$/ }, @paths;
 	return @no_upwards;
 }
 
-method default_case_tolerant { False }
-
-method file_name_is_absolute( $file ) {
-	$file ~~ m/^\//
+method file-name-is-absolute( $file ) {
+	so $file ~~ m/^\//
 }
 
 method path {
@@ -115,9 +110,30 @@ method splitpath( $path, $nofile = False ) {
 		$directory = ~$0;
 		$file      = ~$1;
 	}
-	$directory ~~ s/<?after .> '/'+ $ //; #/
 
 	return ( $volume, $directory, $file );
+}
+
+method path-components (Mu:D $path is copy ) {
+	my ( $volume, $directory, $file ) = ( '', '', '' );
+
+	$path      ~~ s/<?after .> '/'+ $ //;
+	$path      ~~ m/^ ( [ .* \/ ]? ) (<-[\/]>*) /;
+	$directory = ~$0;
+	$file      = ~$1;
+	$directory ~~ s/<?after .> '/'+ $ //; #/
+
+	$file = '/'      if $directory eq '/' && $file eq '';
+	$directory = '.' if $directory eq ''  && $file ne '';
+	    # shell dirname '' produces '.', but we don't because it's probably user error
+
+	return ( $volume, $directory, $file );
+}
+
+
+method join-path ($volume, $directory is copy, $file) {
+	$directory = '' if all($directory, $file) eq '/';
+	self.catpath($volume, $directory, $file);
 }
 
 method splitdir( $path ) {
@@ -144,7 +160,7 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 	$path = self.canonpath( $path );
 	$base = self.canonpath( $base );
 
-	if self.file_name_is_absolute($path) || self.file_name_is_absolute($base) {
+	if self.file-name-is-absolute($path) || self.file-name-is-absolute($base) {
 		$path = self.rel2abs( $path );
 		$base = self.rel2abs( $base );
 	}
@@ -163,7 +179,7 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 	# For UNC paths, the user might give a volume like //foo/bar that
 	# strictly speaking has no directory portion.  Treat it as if it
 	# had the root directory for that volume.
-	if !$base_directories.chars && self.file_name_is_absolute( $base ) {
+	if !$base_directories.chars && self.file-name-is-absolute( $base ) {
 		$base_directories = self.rootdir;
 	}
 
@@ -190,12 +206,12 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 
 method rel2abs( $path is copy, $base is copy = Str ) {
 	# Clean up $path
-	if !self.file_name_is_absolute( $path ) {
+	if !self.file-name-is-absolute( $path ) {
 		# Figure out the effective $base and clean it up.
 		if !$base.defined || $base eq '' {
 			$base = $*CWD;
 		}
-		elsif !self.file_name_is_absolute( $base ) {
+		elsif !self.file-name-is-absolute( $base ) {
 			$base = self.rel2abs( $base )
 		}
 		else {
@@ -209,59 +225,59 @@ method rel2abs( $path is copy, $base is copy = Str ) {
 	return self.canonpath( $path )
 }
 
-method case_tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
+method case-tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
 	# This code should be platform independent, but feel free to add local override
 
-	$path.path.e or fail "Invalid path given";
+	$path.IO.e or fail "Invalid path given";
 	my @dirs = self.splitdir(self.rel2abs($path));
 	my @searchabledirs;
 
 	# try looking at each component of $path to see if has letters
 	loop (my $i = +@dirs; $i--; $i <= 0) {
 		my $p = self.catdir(@dirs[0..$i]);
-		push(@searchabledirs, $p) if $p.path.d;
+		push(@searchabledirs, $p) if $p.IO.d;
 
 		last if $p.IO.l;
-		next unless @dirs[$i] ~~ /<.alpha>/;
+		next unless @dirs[$i] ~~ /<+alpha-[_]>/;
 
-		return self.case_tolerant_folder: @dirs[0..($i-1)], @dirs[$i];
+		return self!case-tolerant-folder: @dirs[0..($i-1)], @dirs[$i];
 	}
 
 	# If nothing in $path contains a letter, search for nearby files, including up the tree
 	# This doesn't actually look recursively; don't want to add File::Find as a dependency
 	for @searchabledirs -> $d {
-		my @filelist = $d.path.contents.grep(/<.alpha>/);
+		my @filelist = dir($d).grep(/<+alpha-[_]>/);
 		next unless @filelist.elems;
 
 		# anything with <alpha> will do
-		return self.case_tolerant_folder: $d, @filelist[0];
+		return self!case-tolerant-folder: $d, @filelist[0];
 	}
 
 	# If we couldn't find anything suitable, try writing a test file
 	if $write_ok {
-		for @searchabledirs.grep({.path.w}) -> $d {
+		for @searchabledirs.grep({.IO.w}) -> $d {
 			my $filelc = self.catdir( $d, 'filespec.tmp');  #because 8.3 filesystems...
 			my $fileuc = self.catdir( $d, 'FILESPEC.TMP');
-			if $filelc.path.e or $fileuc.path.e { die "Wait, where did the file matching <alpha> come from??"; }
+			if $filelc.IO.e or $fileuc.IO.e { die "Wait, where did the file matching <alpha> come from??"; }
 			try {
 				spurt $filelc, 'temporary test file for p6 File::Spec, feel free to delete';
-				my $result = $fileuc.path.e;
+				my $result = $fileuc.IO.e;
 				unlink $filelc;
 				return $result;
 			}
-			CATCH { unlink $filelc unless $filelc.path.e; }
+			CATCH { unlink $filelc if $filelc.IO.e; }
 		}
 	}
 
 	# Okay, we don't have write access... give up and just return the platform default
-	return self.default_case_tolerant;
+	return self.default-case-tolerant;
 
 }
 
-method case_tolerant_folder( \updirs, $curdir ) {
-	return False unless self.catdir( |updirs, $curdir.uc).path.e
-			 && self.catdir( |updirs, $curdir.lc).path.e;
-	return +self.catdir(|updirs).path.contents.grep(/:i ^ $curdir $/) <= 1;
+method !case-tolerant-folder( \updirs, $curdir ) {
+	return False unless self.catdir( |updirs, $curdir.uc).IO.e
+			 && self.catdir( |updirs, $curdir.lc).IO.e;
+	return +dir(self.catdir(|updirs)).grep(/:i ^ $curdir $/) <= 1;
 	# this could be faster by comparing inodes of .uc and .lc
 	# but we can't guarantee POSIXness of every platform that calls this
 }

@@ -2,34 +2,34 @@ use v6;
 use File::Spec::Unix;
 class File::Spec::Win32 is File::Spec::Unix;
 
-my $module = "File::Spec::Unix";
+#my $module = "File::Spec::Unix";
 #require $module;
 
 # Some regexes we use for path splitting
-my $driveletter = regex { <[a..zA..Z]> ':' }
+my $driveletter = regex { <[A..Z a..z]> ':' }
 my $slash	= regex { '/' | '\\' }
 my $UNCpath     = regex { [<$slash> ** 2] <-[\\\/]>+  <$slash>  [<-[\\\/]>+ | $] }
 my $volume_rx   = regex { $<driveletter>=<$driveletter> | $<UNCpath>=<$UNCpath> }
 
 
-method canonpath ($path)         { canon_cat($path)               }
+method canonpath ($path)         { canon-cat($path)               }
 
 method catdir(*@dirs)            {
 	# Legacy / compatibility support
 	return "" unless @dirs;
-	return canon_cat( "\\", |@dirs )
+	return canon-cat( "\\", |@dirs )
 		if @dirs[0] eq "";
 
 	# Compatibility with File::Spec <= 3.26:
 	#     catdir('A:', 'foo') should return 'A:\foo'.
 	if @dirs[0] ~~ /^<$driveletter>$/ {
-		return canon_cat( (@dirs[0]~'\\'), |@dirs[1..*] )
+		return canon-cat( (@dirs[0]~'\\'), |@dirs[1..*] )
 	}
-	return canon_cat(|@dirs);
+	return canon-cat(|@dirs);
 }
 
 method catfile(|c)           { self.catdir(|c)                     }
-method curdir                { ::($module).curdir()                }
+#method curdir                { ::($module).curdir()                }
 method devnull               { 'nul'                               }
 method rootdir               { '\\'                                }
 
@@ -37,7 +37,7 @@ method rootdir               { '\\'                                }
 method tmpdir {
 	state $tmpdir;
 	return $tmpdir if $tmpdir.defined;
-	$tmpdir = ::($module)._tmpdir(
+	$tmpdir = self._firsttmpdir(
 		%*ENV<TMPDIR>,
 		%*ENV<TEMP>,
 		%*ENV<TMP>,
@@ -50,12 +50,12 @@ method tmpdir {
 	);
 }
 
-method updir                     { ::($module).updir()                   }
-method no_upwards(|c)            { ::($module).no_upwards(|c)            }
+#method updir                     { ::($module).updir()                   }
+#method no_upwards(|c)            { ::($module).no_upwards(|c)            }
 #method case_tolerant(|c)         { ::($module).case_tolerant(|c)            }
-method default_case_tolerant     { True                                     }
+method default-case-tolerant     { True                                     }
 
-method file_name_is_absolute ($path) {
+method file-name-is-absolute ($path) {
 	# As of right now, this returns 2 if the path is absolute with a
 	# volume, 1 if it's absolute with no volume, 0 otherwise.
 	given $path {
@@ -98,6 +98,30 @@ method splitpath($path as Str, $nofile as Bool = False) {
 	return ($volume,$directory,$file);
 }
 
+method path-components($path as Str is copy) { 
+
+	my ($volume, $directory, $file) = ('','','');
+	$path ~~ s[ <$slash>+ $] = ''                       #=
+		unless $path ~~ /^ <$driveletter>? <$slash>+ $/;
+
+	$path ~~ 
+	    m/^ ( <$volume_rx> ? )
+		( [ .* <$slash> ]? )
+		(.*)
+	     /;
+	$volume    = ~$0;
+	$directory = ~$1;
+	$file      = ~$2;
+        $directory ~~ s/ <?after .> <$slash>+ $//;
+
+	$file = '\\'      if $directory eq any('/', '\\') && $file eq '';
+	$directory = '.'  if $directory eq ''             && $file ne '';
+
+	return ($volume,$directory,$file);
+}
+
+method join-path (|c) { self.catpath(|c)  }
+
 method splitdir($dir)            { $dir.split($slash)                    }
 method catpath($volume is copy, $directory, $file) {
 
@@ -120,7 +144,7 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 	$path = self.canonpath( $path );
 	$base = self.canonpath( $base );
 
-	if self.file_name_is_absolute($path) || self.file_name_is_absolute($base) {
+	if self.file-name-is-absolute($path) || self.file-name-is-absolute($base) {
 		$path = self.rel2abs( $path );
 		$base = self.rel2abs( $base );
 	}
@@ -139,7 +163,7 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 	# For UNC paths, the user might give a volume like //foo/bar that
 	# strictly speaking has no directory portion.  Treat it as if it
 	# had the root directory for that volume.
-	if !$base_directories.chars && self.file_name_is_absolute( $base ) {
+	if !$base_directories.chars && self.file-name-is-absolute( $base ) {
 		$base_directories = self.rootdir;
 	}
 
@@ -167,7 +191,7 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 
 method rel2abs ($path is copy, $base? is copy) {
 
-	my $is_abs = self.file_name_is_absolute($path);
+	my $is_abs = self.file-name-is-absolute($path);
 
 	# Check for volume (should probably document the '2' thing...)
 	return self.canonpath( $path ) if $is_abs == 2;
@@ -186,7 +210,7 @@ method rel2abs ($path is copy, $base? is copy) {
 		#$base = $*CWD unless defined $base ;
 		$base = $*CWD;
 	}
-	elsif ( !self.file_name_is_absolute( $base ) ) {
+	elsif ( !self.file-name-is-absolute( $base ) ) {
 		$base = self.rel2abs( $base );
 	}
 	else {
@@ -207,7 +231,7 @@ method rel2abs ($path is copy, $base? is copy) {
 }
 
 
-sub canon_cat ( $first is copy, *@rest ) {
+sub canon-cat ( $first is copy, *@rest ) {
 
 	my $volumematch =
 	     $first ~~ /^ ([   <$driveletter> <$slash>?
@@ -219,7 +243,6 @@ sub canon_cat ( $first is copy, *@rest ) {
 	my $volume = ~$volumematch[0];
 	$first =     ~$volumematch[1];
 
-	#$volume ~~ s:g/ '/' /\\/;     #::
 	$volume.=subst(:g, '/', '\\');
 	if $volume ~~ /^<$driveletter>/ {
 		$volume.=uc;
