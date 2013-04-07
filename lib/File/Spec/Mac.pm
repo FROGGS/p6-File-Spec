@@ -15,13 +15,13 @@ method rootdir               { ::($module).rootdir()               }
 my $tmpdir;
 method tmpdir {
 	return $tmpdir if $tmpdir.defined;
-	$tmpdir = self._tmpdir( %*ENV{'TMPDIR'} );
+	$tmpdir = self._firsttmpdir( %*ENV{'TMPDIR'} );
 }
 
 method updir                 { '::'                                }
-method no_upwards            { ::($module).no_upwards()            }
-method case_tolerant         { 1                                   }
-method file_name_is_absolute ($path) {
+method no-upwards            { ::($module).no-upwards()            }
+method case-tolerant         { 1                                   }
+method file-name-is-absolute ($path) {
 	do given $path {
 		when  m/':'/	{ ! ($path ~~ /^':'/) }
 		when ''		{ True  }

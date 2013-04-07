@@ -46,10 +46,10 @@ is $Unix.rootdir, '/',         'rootdir is "/"';
 is $Unix.updir,   '..',        'updir is ".."';
 my @get  = <. .. .git blib lib t>;
 my @want = <.git blib lib t>;
-is_deeply $Unix.no_upwards( @get ), @want, 'no_upwards: (. .. .git blib lib t) -> (.git blib lib t)';
+is_deeply $Unix.no-upwards( @get ), @want, 'no-upwards: (. .. .git blib lib t) -> (.git blib lib t)';
 
-ok  $Unix.file_name_is_absolute( '/abcd' ), 'file_name_is_absolute: ok "/abcd"';
-nok $Unix.file_name_is_absolute( 'abcd' ),  'file_name_is_absolute: nok "abcd"';
+ok  $Unix.file-name-is-absolute( '/abcd' ), 'file-name-is-absolute: ok "/abcd"';
+nok $Unix.file-name-is-absolute( 'abcd' ),  'file-name-is-absolute: nok "abcd"';
 
 my $path = %*ENV{'PATH'};
 %*ENV{'PATH'} = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:';
@@ -65,14 +65,14 @@ is $Unix.join('./c'),         'c',     "join: './c' -> 'c'";
 
 my %splitpath = (
 	'file'            => ('', '',             'file'),
-	'/d1/d2/d3/'      => ('', '/d1/d2/d3',   ''),
-	'd1/d2/d3/'       => ('', 'd1/d2/d3',    ''),
+	'/d1/d2/d3/'      => ('', '/d1/d2/d3/',   ''),
+	'd1/d2/d3/'       => ('', 'd1/d2/d3/',    ''),
 	'/d1/d2/d3/.'     => ('', '/d1/d2/d3/.',  ''),
 	'/d1/d2/d3/..'    => ('', '/d1/d2/d3/..', ''),
-	'/d1/d2/d3/.file' => ('', '/d1/d2/d3',   '.file'),
-	'd1/d2/d3/file'   => ('', 'd1/d2/d3',    'file'),
-	'/../../d1/'      => ('', '/../../d1',   ''),
-	'/././d1/'        => ('', '/././d1',     ''),
+	'/d1/d2/d3/.file' => ('', '/d1/d2/d3/',   '.file'),
+	'd1/d2/d3/file'   => ('', 'd1/d2/d3/',    'file'),
+	'/../../d1/'      => ('', '/../../d1/',   ''),
+	'/././d1/'        => ('', '/././d1/',     ''),
 );
 for %splitpath.kv -> $get, $want {
 	is $Unix.splitpath( $get ),
@@ -132,13 +132,13 @@ else {
 	is File::Spec.MODULE, "File::Spec::Unix", "unix: loads correct module";
 	is File::Spec.rel2abs( File::Spec.curdir ), $*CWD, "rel2abs: \$*CWD test";
 	ok File::Spec.tmpdir.IO.d && File::Spec.tmpdir.IO.w, "tmpdir: {File::Spec.tmpdir} is a writable directory";
-	#case_tolerant
+	#case-tolerant
 	if (cwd.IO ~~ :w) {
 		"casetol.tmp".IO.e or spurt "casetol.tmp", "temporary test file, delete after reading";
-		is $Unix.case_tolerant("casetol.tmp"), so "CASETOL.TMP".IO.e, "case_tolerant is {so "CASETOL.TMP".IO.e} in cwd";
+		is $Unix.case-tolerant("casetol.tmp"), so "CASETOL.TMP".IO.e, "case-tolerant is {so "CASETOL.TMP".IO.e} in cwd";
 		unlink "casetol.tmp";
 	}
-	else { skip "case_tolerant, no write access in cwd", 1; } 
+	else { skip "case-tolerant, no write access in cwd", 1; } 
 
 }
 
