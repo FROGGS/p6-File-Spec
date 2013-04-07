@@ -83,7 +83,7 @@ method no_upwards( *@paths ) {
 }
 
 method file_name_is_absolute( $file ) {
-	$file ~~ m/^\//
+	so $file ~~ m/^\//
 }
 
 method path {
@@ -114,7 +114,7 @@ method splitpath( $path, $nofile = False ) {
 	return ( $volume, $directory, $file );
 }
 
-method path-components ( $path is copy ) {
+method path-components (Mu:D $path is copy ) {
 	my ( $volume, $directory, $file ) = ( '', '', '' );
 
 	$path      ~~ s/<?after .> '/'+ $ //;
@@ -123,11 +123,18 @@ method path-components ( $path is copy ) {
 	$file      = ~$1;
 	$directory ~~ s/<?after .> '/'+ $ //; #/
 
+	$file = '/'      if $directory eq '/' && $file eq '';
+	$directory = '.' if $directory eq ''  && $file ne '';
+	    # shell dirname '' produces '.', but we don't because it's probably user error
+
 	return ( $volume, $directory, $file );
 }
 
 
-method join-path (|c) { self.catpath(|c) }
+method join-path ($volume, $directory is copy, $file) {
+	$directory = '' if all($directory, $file) eq '/';
+	self.catpath($volume, $directory, $file);
+}
 
 method splitdir( $path ) {
 	return $path.split( /\// )

@@ -114,6 +114,9 @@ method path-components($path as Str is copy) {
 	$file      = ~$2;
         $directory ~~ s/ <?after .> <$slash>+ $//;
 
+	$file = '\\'      if $directory eq any('/', '\\') && $file eq '';
+	$directory = '.'  if $directory eq ''             && $file ne '';
+
 	return ($volume,$directory,$file);
 }
 
