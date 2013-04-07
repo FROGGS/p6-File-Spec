@@ -5,7 +5,7 @@ Usage:
 
 	use File::Spec;
 	say File::Spec.curdir;   #your current OS's curdir
-	say File::Spec.os('Win32').rootdir   # "\\" on any OS
+	say File::Spec.os('Win32').rootdir   # "\" on any OS
 
 Methods (current state):
 
@@ -18,9 +18,9 @@ Methods (current state):
 	rootdir                done         done        done  done
 	tmpdir                 done  done   done  done  done  done
 	updir                  done  done   done  done  done  done
-	no_upwards             done         done        done  done
-	case_tolerant          done  done   done  done  done  done
-	file_name_is_absolute  done  done   done  done  done  done
+	no-upwards             done         done        done  done
+	case-tolerant          done  done   done  done  done  done
+	file-name-is-absolute  done  done   done  done  done  done
 	path                   done         done  done  done  done
 	join                   done         done        done  done
 	splitpath              done  done   done   ~~   done  done
@@ -39,12 +39,12 @@ See [Perl 5 File::Spec](http://search.cpan.org/~smueller/PathTools-3.40/lib/File
 
 ## Changed methods
 ### case_tolerant
-Method `case_tolerant` now requires a path (default $*CWD), below which the it tests for case sensitivity.  A :no-write parameter may be passed if you want to disable writing of test files (which is tried last).
+Method `case_tolerant` now requires a path (default $*CWD), below which it tests for case sensitivity.  A :no-write parameter may be passed if you want to disable writing of test files (which is tried last).
 
 	File::Spec.case_tolerant('foo/bar');
 	File::Spec.case_tolerant('/etc', :no-write);
 
-It will find case (in)sensitivity if any of the following are true, in increasing order of desparation:
+It will find case (in)sensitivity if any of the following are true, in increasing order of desperation:
 
 * The $path passed contains \<alpha\> and no symbolic links.
 * The $path contains \<alpha\> after the last symlink.
@@ -52,7 +52,6 @@ It will find case (in)sensitivity if any of the following are true, in increasin
 * Any folders in the path (under the last symlink, if applicable) are writable.
 
 Otherwise, it returns the platform default.
-
 
 ## New methods
 
@@ -81,7 +80,7 @@ On systems with no concept of volume, returns `''` (the empty string) for volume
 	($volume, $directories, $basename) =
 			File::Spec.path-components( $path );
 
-The results can be passed to `.join-path` to get back a path equivalent to (usually identical to) the original path.
+The results can be passed to `.join-path` to get back a path equivalent to (but not necessarily identical to) the original path.  If you want to keep all of the characters involved, use `.splitdir` instead.
 
 
 ### join-path
@@ -90,17 +89,16 @@ A close relative of `.catpath`, this function takes volume, directory and basena
 
 	$full-path = File::Spec.join-path($volume, $dirname, $basename);
 
-
 Directory separators are inserted if necessary.  Under Unix, $volume is ignored, and only directory and basename are concatenated.  On other OSes, $volume is significant.
 
 This method is the inverse of `.path-components`; the results can be passed to it to get the volume, dirname, and basename portions back.
 
 ### Comparison of path-components and splitpath
 
-	OS    Path       splitpath               path-components
-	linux /a/b/c     ("", "/a/b/", "c")      ("", "/a/b", "c")
-	linux /a/b//c/   ("", "/a/b//c/", "")    ("", "/a/b", "c")
-	linux /a/b/.     ("", "/a/b/.", "")      ("", "/a/b", ".")
-	win32 C:\a\b\    ("C:", "\\a\\b\\", "")  ("C:", "\\a", "b")
-        VMS   A:[b.c]    ("A:", "[b.c]", "")     ("A:", "[b]", "[c]")
+	OS      Path       splitpath               path-components
+	linux   /a/b/c     ("", "/a/b/", "c")      ("", "/a/b", "c")
+	linux   /a/b//c/   ("", "/a/b//c/", "")    ("", "/a/b", "c")
+	linux   /a/b/.     ("", "/a/b/.", "")      ("", "/a/b", ".")
+	Win32   C:\a\b\    ("C:", "\\a\\b\\", "")  ("C:", "\\a", "b")
+	VMS     A:[b.c]    ("A:", "[b.c]", "")     ("A:", "[b]", "[c]")
 

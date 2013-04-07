@@ -38,8 +38,8 @@ method tmpdir {
 	state $tmpdir;
 	return $tmpdir if defined $tmpdir;
 	$tmpdir = $unix_report
-	            ?? self._tmpdir('/tmp', '/sys$scratch', %*ENV<TMPDIR>)
-	            !! self._tmpdir( 'sys$scratch:', %*ENV<TMPDIR> );
+	            ?? self._firsttmpdir('/tmp', '/sys$scratch', %*ENV<TMPDIR>)
+	            !! self._firsttmpdir( 'sys$scratch:', %*ENV<TMPDIR> );
 }
 
 method splitpath ($path, $nofile = False) {

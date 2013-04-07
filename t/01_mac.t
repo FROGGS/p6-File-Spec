@@ -49,11 +49,12 @@ else {
 	#rootdir
 	#tmpdir
 	is File::Spec.updir,   '::',       'updir is "::"';
-	#no_upwards
+	#no-upwards
 
-	is File::Spec.case_tolerant, 1, 'case_tolerant is 0';
+	is File::Spec.case-tolerant, True, 'case-tolerant is True';
+	is File::Spec.default-case-tolerant, True, 'default-case-tolerant is True';
 
-	#file_name_is_absolute
+	#file-name-is-absolute
 	#path
 	#join
 	is File::Spec.splitpath('hd:file'), 'hd:,,file';

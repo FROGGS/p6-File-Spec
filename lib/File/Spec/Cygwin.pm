@@ -35,16 +35,16 @@ method catdir ( *@paths ) {
 
 
 #| True is returned if the file name begins with C<drive_letter:/>,
-#| and if not, File::Spec::Unix.file_name_is_absolute is called.
-sub file_name_is_absolute ($file) {
+#| and if not, File::Spec::Unix.file-name-is-absolute is called.
+sub file-name-is-absolute ($file) {
     return True if $file ~~ m★ ^ [<[A..Z a..z]>:]?  <[\\/]>★; # C:/test
-    File::Spec::Unix.file_name_is_absolute($file);
+    File::Spec::Unix.file-name-is-absolute($file);
 }
 
 method tmpdir {
     state $tmpdir;
     return $tmpdir if defined $tmpdir;
-    $tmpdir = File::Spec::Unix._tmpdir(
+    $tmpdir = File::Spec::Unix._firsttmpdir(
 		 %*ENV<TMPDIR>,
 		 "/tmp",
 		 %*ENV<TMP>,
@@ -67,7 +67,7 @@ method join-path (|c)         { self.catpath(|c)                    }
 #method updir                 { ::($module).updir()                 }
 #method no_upwards            { ::($module).no_upwards()            }
 #method case_tolerant         { ::($module).case_tolerant()         }
-method default_case_tolerant { True                                }
+method default-case-tolerant { True                                }
 #method path                  { ::($module).path()                  }
 #method join                  { ::($module).join()                  }
 #method splitpath             { ::($module).splitpath()             }

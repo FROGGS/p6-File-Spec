@@ -11,7 +11,7 @@ if $*OS !~~ 'VMS' {
 else {
 	is File::Spec.curdir, '.', 'curdir is "."';
 
-	is File::Spec.case_tolerant, 1, 'case_tolerant is 0';
+	is File::Spec.case-tolerant, 1, 'case-tolerant is 0';
 
 }
 

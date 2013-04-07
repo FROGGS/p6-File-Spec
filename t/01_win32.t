@@ -199,7 +199,7 @@ is $win32.curdir,  '.',   'curdir is "."';
 is $win32.devnull, 'nul', 'devnull is nul';
 is $win32.rootdir, '\\',  'rootdir is "\\"';
 is $win32.updir,   '..',  'updir is ".."';
-is $win32.default_case_tolerant, True, 'default_case_tolerant is True';
+is $win32.default-case-tolerant, True, 'default-case-tolerant is True';
 
 
 if $*OS !~~ any(<MSWin32 NetWare symbian>) {
@@ -210,8 +210,8 @@ else {
 	is File::Spec.devnull, 'nul', 'devnull is nul';
 	is File::Spec.rootdir, '\\',  'rootdir is "\\"';
 	#tmpdir
-	#no_upwards
-	is File::Spec.case_tolerant, 1, 'case_tolerant is 1';
+	#no-upwards
+	is File::Spec.case-tolerant, 1, 'case-tolerant is 1';
 
 	#join
 

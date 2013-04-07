@@ -58,9 +58,9 @@ method curdir {	'.'  }
 method updir  { '..' }
 method rootdir { '/' }
 method devnull { '/dev/null' }
-method default_case_tolerant { False }
+method default-case-tolerant { False }
 
-method _tmpdir( *@dirlist ) {
+method _firsttmpdir( *@dirlist ) {
 	my $tmpdir = @dirlist.first: { .defined && .IO.d && .IO.w }
 		or fail "No viable candidates for a temporary directory found";
 	self.canonpath( $tmpdir );
@@ -69,7 +69,7 @@ method _tmpdir( *@dirlist ) {
 method tmpdir {
 	state $tmpdir;
 	return $tmpdir if $tmpdir.defined;
-	return $tmpdir = self._tmpdir(
+	return $tmpdir = self._firsttmpdir(
 				%*ENV{'TMPDIR'},
 				'/tmp',
 				self.curdir
@@ -77,12 +77,12 @@ method tmpdir {
 }
 
 
-method no_upwards( *@paths ) {
+method no-upwards( *@paths ) {
 	my @no_upwards = grep { $_ !~~ /^[\.|\.\.]$/ }, @paths;
 	return @no_upwards;
 }
 
-method file_name_is_absolute( $file ) {
+method file-name-is-absolute( $file ) {
 	so $file ~~ m/^\//
 }
 
@@ -160,7 +160,7 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 	$path = self.canonpath( $path );
 	$base = self.canonpath( $base );
 
-	if self.file_name_is_absolute($path) || self.file_name_is_absolute($base) {
+	if self.file-name-is-absolute($path) || self.file-name-is-absolute($base) {
 		$path = self.rel2abs( $path );
 		$base = self.rel2abs( $base );
 	}
@@ -179,7 +179,7 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 	# For UNC paths, the user might give a volume like //foo/bar that
 	# strictly speaking has no directory portion.  Treat it as if it
 	# had the root directory for that volume.
-	if !$base_directories.chars && self.file_name_is_absolute( $base ) {
+	if !$base_directories.chars && self.file-name-is-absolute( $base ) {
 		$base_directories = self.rootdir;
 	}
 
@@ -206,12 +206,12 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 
 method rel2abs( $path is copy, $base is copy = Str ) {
 	# Clean up $path
-	if !self.file_name_is_absolute( $path ) {
+	if !self.file-name-is-absolute( $path ) {
 		# Figure out the effective $base and clean it up.
 		if !$base.defined || $base eq '' {
 			$base = $*CWD;
 		}
-		elsif !self.file_name_is_absolute( $base ) {
+		elsif !self.file-name-is-absolute( $base ) {
 			$base = self.rel2abs( $base )
 		}
 		else {
@@ -225,7 +225,7 @@ method rel2abs( $path is copy, $base is copy = Str ) {
 	return self.canonpath( $path )
 }
 
-method case_tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
+method case-tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
 	# This code should be platform independent, but feel free to add local override
 
 	$path.IO.e or fail "Invalid path given";
@@ -240,7 +240,7 @@ method case_tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
 		last if $p.IO.l;
 		next unless @dirs[$i] ~~ /<+alpha-[_]>/;
 
-		return self.case_tolerant_folder: @dirs[0..($i-1)], @dirs[$i];
+		return self!case-tolerant-folder: @dirs[0..($i-1)], @dirs[$i];
 	}
 
 	# If nothing in $path contains a letter, search for nearby files, including up the tree
@@ -250,7 +250,7 @@ method case_tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
 		next unless @filelist.elems;
 
 		# anything with <alpha> will do
-		return self.case_tolerant_folder: $d, @filelist[0];
+		return self!case-tolerant-folder: $d, @filelist[0];
 	}
 
 	# If we couldn't find anything suitable, try writing a test file
@@ -270,11 +270,11 @@ method case_tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
 	}
 
 	# Okay, we don't have write access... give up and just return the platform default
-	return self.default_case_tolerant;
+	return self.default-case-tolerant;
 
 }
 
-method case_tolerant_folder( \updirs, $curdir ) {
+method !case-tolerant-folder( \updirs, $curdir ) {
 	return False unless self.catdir( |updirs, $curdir.uc).IO.e
 			 && self.catdir( |updirs, $curdir.lc).IO.e;
 	return +dir(self.catdir(|updirs)).grep(/:i ^ $curdir $/) <= 1;

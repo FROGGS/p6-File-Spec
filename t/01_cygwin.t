@@ -129,7 +129,7 @@ is $cygwin.curdir,  '.',   'curdir is "."';
 is $cygwin.devnull, '/dev/null', 'devnull is /dev/null';
 is $cygwin.rootdir, '/',  'rootdir is "\\"';
 is $cygwin.updir,   '..',  'updir is ".."';
-is $cygwin.default_case_tolerant, True, 'default_case_tolerant is True';
+is $cygwin.default-case-tolerant, True, 'default-case-tolerant is True';
 
 
 if $*OS !~~ any(<cygwin>) {
@@ -140,8 +140,8 @@ else {
 	#is File::Spec.devnull, '/dev/null', 'devnull is nul';
 	is File::Spec.rootdir, '\\',  'rootdir is "\\"';
 	#tmpdir
-	#no_upwards
-	is File::Spec.case_tolerant, True, 'case_tolerant is True';
+	#no-upwards
+	is File::Spec.case-tolerant, True, 'case-tolerant is True';
 
 	#join
 
