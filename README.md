@@ -113,7 +113,7 @@ This method is the inverse of `.split`; the results can be passed to it to get t
 	OS     Components            catpath        join
 	linux  ("", "/a/b", "c")     /a/b/c         a/b/c
 	linux  ("", ".", "foo")      ./foo          foo
-        linux  ("", "/", "/")        //             /
+	linux  ("", "/", "/")        //             /
 	Win32  ("C:", "\a", "b")     C:\a\b         C:\a\b
 	VMS    ("A:", "[b]", "[c]")  A:[b][c]       A:[b.c]
 
