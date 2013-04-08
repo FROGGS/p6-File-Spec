@@ -30,6 +30,8 @@ method file-name-is-absolute ($path) {
 }
 method path                  { ::($module).path()                  }
 method join                  { ::($module).join()                  }
+method split ($path)         { self.splitpath($path)               }
+  #double-check this, not sure splitpath produces correct result
 
 method splitpath ($path as Str, $nofile as Bool = False) {
 	my ($volume,$directory,$file, $match);
@@ -59,6 +61,7 @@ method splitpath ($path as Str, $nofile as Bool = False) {
 
 	return ( $volume, $directory, $file );
 }
+
 
 method splitdir              { ::($module).splitdir()              }
 method catpath               { ::($module).catpath()               }

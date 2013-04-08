@@ -2,9 +2,6 @@ use v6;
 use File::Spec::Unix;
 class File::Spec::Win32 is File::Spec::Unix;
 
-#my $module = "File::Spec::Unix";
-#require $module;
-
 # Some regexes we use for path splitting
 my $driveletter = regex { <[A..Z a..z]> ':' }
 my $slash	= regex { '/' | '\\' }
@@ -27,12 +24,11 @@ method catdir(*@dirs)            {
 	}
 	return canon-cat(|@dirs);
 }
+method splitdir($dir)        { $dir.split($slash)                  }
 
 method catfile(|c)           { self.catdir(|c)                     }
-#method curdir                { ::($module).curdir()                }
 method devnull               { 'nul'                               }
 method rootdir               { '\\'                                }
-
 
 method tmpdir {
 	state $tmpdir;
@@ -50,9 +46,14 @@ method tmpdir {
 	);
 }
 
-#method updir                     { ::($module).updir()                   }
-#method no_upwards(|c)            { ::($module).no_upwards(|c)            }
-#method case_tolerant(|c)         { ::($module).case_tolerant(|c)            }
+method path {
+	my @path = split(';', %*ENV<PATH>);
+	@path».=subst(:global, q/"/, '');
+	@path = grep *.chars, @path;
+	unshift @path, ".";
+	return @path;
+}
+
 method default-case-tolerant     { True                                     }
 
 method file-name-is-absolute ($path) {
@@ -65,15 +66,32 @@ method file-name-is-absolute ($path) {
 	}   #/
 }
 
-method path {
-	my @path = split(';', %*ENV<PATH>);
-	@path».=subst(:global, q/"/, '');
-	@path = grep *.chars, @path;
-	unshift @path, ".";
-	return @path;
+method split ($path as Str is copy) { 
+
+	my ($volume, $directory, $file) = ('','','');
+	$path ~~ s[ <$slash>+ $] = ''                       #=
+		unless $path ~~ /^ <$driveletter>? <$slash>+ $/;
+
+	$path ~~ 
+	    m/^ ( <$volume_rx> ? )
+		( [ .* <$slash> ]? )
+		(.*)
+	     /;
+	$volume    = ~$0;
+	$directory = ~$1;
+	$file      = ~$2;
+        $directory ~~ s/ <?after .> <$slash>+ $//;
+
+	$file = '\\'      if $directory eq any('/', '\\') && $file eq '';
+	$directory = '.'  if $directory eq ''             && $file ne '';
+
+	return ($volume,$directory,$file);
 }
 
-method join(|c)                  { self.catfile(|c)                }
+method join ($volume, $directory is copy, $file) { 
+	$directory = '' if all($directory, $file) eq any('/','\\')
+                        or $directory eq '.' && $file.chars;
+	self.catpath($volume, $directory, $file)  }
 
 method splitpath($path as Str, $nofile as Bool = False) { 
 
@@ -98,35 +116,10 @@ method splitpath($path as Str, $nofile as Bool = False) {
 	return ($volume,$directory,$file);
 }
 
-method path-components($path as Str is copy) { 
-
-	my ($volume, $directory, $file) = ('','','');
-	$path ~~ s[ <$slash>+ $] = ''                       #=
-		unless $path ~~ /^ <$driveletter>? <$slash>+ $/;
-
-	$path ~~ 
-	    m/^ ( <$volume_rx> ? )
-		( [ .* <$slash> ]? )
-		(.*)
-	     /;
-	$volume    = ~$0;
-	$directory = ~$1;
-	$file      = ~$2;
-        $directory ~~ s/ <?after .> <$slash>+ $//;
-
-	$file = '\\'      if $directory eq any('/', '\\') && $file eq '';
-	$directory = '.'  if $directory eq ''             && $file ne '';
-
-	return ($volume,$directory,$file);
-}
-
-method join-path (|c) { self.catpath(|c)  }
-
-method splitdir($dir)            { $dir.split($slash)                    }
 method catpath($volume is copy, $directory, $file) {
 
 	# Make sure the glue separator is present
-	# unless it's a relative like A:foo.txt
+	# unless it's a relative path like A:foo.txt
 	if $volume ne ''
 	   and $volume !~~ /^<$driveletter>/
 	   and $volume !~~ /<$slash> $/

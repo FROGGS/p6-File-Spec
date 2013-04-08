@@ -4,7 +4,7 @@ use Test;
 use File::Spec;
 use File::Spec::Win32;
 
-plan 136;
+plan 182;
 my $win32 = File::Spec::Win32;
 
 say "# File::Spec::Win32";
@@ -133,6 +133,69 @@ my @catpath =
 for @catpath -> $in, $out {
 	is $win32.catpath(|$in), $out, "catpath: {$in.perl} -> '$out'"
 }
+
+say "# split tests";
+my @split = 
+        '\\',                               ',\\,\\',
+        '.',                               ',.,.',
+	'file',                            ',.,file',
+	'\\d1/d2\\d3/',                    ',\\d1/d2,d3',
+	'd1/d2\\d3/',                      ',d1/d2,d3',
+	'\\d1/d2\\d3/.',                   ',\\d1/d2\\d3,.',
+	'\\d1/d2\\d3/..',                  ',\\d1/d2\\d3,..',
+	'\\d1/d2\\d3/.file',               ',\\d1/d2\\d3,.file',
+	'\\d1/d2\\d3/file',                ',\\d1/d2\\d3,file',
+	'd1/d2\\d3/file',                  ',d1/d2\\d3,file',
+	'C:\\d1/d2\\d3/',                  'C:,\\d1/d2,d3',
+	'C:d1/d2\\d3/',                    'C:,d1/d2,d3',
+	'C:\\d1/d2\\d3/file',              'C:,\\d1/d2\\d3,file',
+	'C:d1/d2\\d3/file',                'C:,d1/d2\\d3,file',
+	'C:\\../d2\\d3/file',              'C:,\\../d2\\d3,file',
+	'C:../d2\\d3/file',                'C:,../d2\\d3,file',
+	'\\../..\\d1/',                    ',\\../..,d1',
+	'\\./.\\d1/',                      ',\\./.,d1',
+	'\\\\node\\share\\d1/d2\\d3/',     '\\\\node\\share,\\d1/d2,d3',
+	'\\\\node\\share\\d1/d2\\d3/file', '\\\\node\\share,\\d1/d2\\d3,file',
+	'\\\\node\\share\\d1/d2\\file',    '\\\\node\\share,\\d1/d2,file',
+;
+for @split -> $in, $out {
+	is $win32.split(|$in).join(','), $out, "split: {$in.perl} -> '$out'"
+}
+
+say "# join tests";
+my @join = 
+	('','\\','\\').item,                            '\\',
+	('','/','\\').item,                             '\\',
+	('','\\','/').item,                             '/',
+	('','.','.').item,                              '.',
+	('','','file').item,                            'file',
+	('','.','file').item,                           'file',
+	('','\\d1/d2\\d3/','').item,                    '\\d1/d2\\d3/',
+	('','d1/d2\\d3/','').item,                      'd1/d2\\d3/',
+	('','\\d1/d2\\d3/.','').item,                   '\\d1/d2\\d3/.',
+	('','\\d1/d2\\d3/..','').item,                  '\\d1/d2\\d3/..',
+	('','\\d1/d2\\d3/','.file').item,               '\\d1/d2\\d3/.file',
+	('','\\d1/d2\\d3/','file').item,                '\\d1/d2\\d3/file',
+	('','d1/d2\\d3/','file').item,                  'd1/d2\\d3/file',
+	('C:','\\d1/d2\\d3/','').item,                  'C:\\d1/d2\\d3/',
+	('C:','d1/d2\\d3/','').item,                    'C:d1/d2\\d3/',
+	('C:','\\d1/d2\\d3/','file').item,              'C:\\d1/d2\\d3/file',
+	('C:','d1/d2\\d3/','file').item,                'C:d1/d2\\d3/file',
+	('C:','\\../d2\\d3/','file').item,              'C:\\../d2\\d3/file',
+	('C:','../d2\\d3/','file').item,                'C:../d2\\d3/file',
+	('','\\../..\\d1/','').item,                    '\\../..\\d1/',
+	('','\\./.\\d1/','').item,                      '\\./.\\d1/',
+	('C:','foo','bar').item,                        'C:foo\\bar',
+	('\\\\node\\share','\\d1/d2\\d3/','').item,     '\\\\node\\share\\d1/d2\\d3/',
+	('\\\\node\\share','\\d1/d2\\d3/','file').item, '\\\\node\\share\\d1/d2\\d3/file',
+	('\\\\node\\share','\\d1/d2\\','file').item,    '\\\\node\\share\\d1/d2\\file';
+
+for @join -> $in, $out {
+	is $win32.join(|$in), $out, "join: {$in.perl} -> '$out'"
+}
+
+
+
 
 my @catfile = 
 	('a','b','c').item,        'a\\b\\c',

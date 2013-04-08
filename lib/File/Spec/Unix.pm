@@ -44,21 +44,11 @@ method canonpath( $path is copy ) {
 	return "$node$path";
 }
 
-method catdir( *@parts ) { self.canonpath( (@parts, '').join('/') ) }
-
-method catfile( *@parts is copy ) {
-	my $file = self.canonpath( @parts.pop );
-	return $file unless @parts.elems;
-	my $dir  = self.catdir( @parts );
-	$dir    ~= '/' unless $dir.substr(*-1) eq '/';
-	return $dir ~ $file;
-}
-
 method curdir {	'.'  }
 method updir  { '..' }
 method rootdir { '/' }
 method devnull { '/dev/null' }
-method default-case-tolerant { False }
+method default-case-tolerant { $*OS eq 'darwin' }
 
 method _firsttmpdir( *@dirlist ) {
 	my $tmpdir = @dirlist.first: { .defined && .IO.d && .IO.w }
@@ -75,7 +65,6 @@ method tmpdir {
 				self.curdir
 	                 );
 }
-
 
 method no-upwards( *@paths ) {
 	my @no_upwards = grep { $_ !~~ /^[\.|\.\.]$/ }, @paths;
@@ -95,10 +84,6 @@ method path {
 	return @path
 }
 
-method join( *@parts ) {
-	self.catfile( @parts )
-}
-
 method splitpath( $path, $nofile = False ) {
 	my ( $volume, $directory, $file ) = ( '', '', '' );
 
@@ -114,7 +99,7 @@ method splitpath( $path, $nofile = False ) {
 	return ( $volume, $directory, $file );
 }
 
-method path-components (Mu:D $path is copy ) {
+method split (Mu:D $path is copy ) {
 	my ( $volume, $directory, $file ) = ( '', '', '' );
 
 	$path      ~~ s/<?after .> '/'+ $ //;
@@ -131,13 +116,10 @@ method path-components (Mu:D $path is copy ) {
 }
 
 
-method join-path ($volume, $directory is copy, $file) {
-	$directory = '' if all($directory, $file) eq '/';
+method join ($volume, $directory is copy, $file) {
+	$directory = '' if all($directory, $file) eq '/'
+                        or $directory eq '.' && $file.chars;
 	self.catpath($volume, $directory, $file);
-}
-
-method splitdir( $path ) {
-	return $path.split( /\// )
 }
 
 method catpath( $volume, $directory is copy, $file ) {
@@ -152,6 +134,20 @@ method catpath( $volume, $directory is copy, $file ) {
 	}
 
 	return $directory
+}
+
+method catdir( *@parts ) { self.canonpath( (@parts, '').join('/') ) }
+
+method splitdir( $path ) {
+	return $path.split( /\// )
+}
+
+method catfile( *@parts is copy ) {
+	my $file = self.canonpath( @parts.pop );
+	return $file unless @parts.elems;
+	my $dir  = self.catdir( @parts );
+	$dir    ~= '/' unless $dir.substr(*-1) eq '/';
+	return $dir ~ $file;
 }
 
 method abs2rel( $path is copy, $base is copy = Str ) {
