@@ -46,5 +46,5 @@ method rel2abs( $path, $base = Str )        { ::($module).rel2abs( $path, $base 
 method case-tolerant( $path = $*CWD )       { ::($module).case-tolerant( $path )               }
 
 method split ( $path )                       { ::($module).split( $path )                      }
-method join ( $volume, $directory, $file)    { ::($module).join( $volume, $directory, $file )  }
+method join ( $volume, $directory, $file )   { ::($module).join( $volume, $directory, $file )  }
 

@@ -22,7 +22,6 @@ Methods (current state):
 	case-tolerant          done  done   done  done  done  done
 	file-name-is-absolute  done  done   done  done  done  done
 	path                   done         done  done  done  done
-	join                   done         done        done  done
 	splitpath              done  done   done   ~~   done  done
 	splitdir               done         done        done  done
 	catpath                done         done   ~~   done  done
@@ -111,7 +110,7 @@ This method is the inverse of `.split`; the results can be passed to it to get t
 ### Comparison of catpath and join
 
 	OS     Components            catpath        join
-	linux  ("", "/a/b", "c")     /a/b/c         a/b/c
+	linux  ("", "/a/b", "c")     /a/b/c         /a/b/c
 	linux  ("", ".", "foo")      ./foo          foo
 	linux  ("", "/", "/")        //             /
 	Win32  ("C:", "\a", "b")     C:\a\b         C:\a\b
