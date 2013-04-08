@@ -28,8 +28,8 @@ Methods (current state):
 	catpath                done         done   ~~   done  done
 	abs2rel                done         done        done  done
 	rel2abs                done         done        done  done
-	path-components        done         done   ~~   done  done
-	join-path              done         done   ~~   done  done
+	split                  done         done   ~~   done  done
+	join                   done         done   ~~   done  done
 
 '~~' means partially implemented, but not passing tests.
 
@@ -38,6 +38,11 @@ Methods (current state):
 See [Perl 5 File::Spec](http://search.cpan.org/~smueller/PathTools-3.40/lib/File/Spec.pm) for now.  The methods are the same, but use dots instead of arrows.
 
 ## Changed methods
+
+### join
+
+The method `join` is no longer an alias for `catfile`, but instead a unique function similar to `catpath`.  See the description of join in the New methods section.
+
 ### case_tolerant
 Method `case_tolerant` now requires a path (default $*CWD), below which it tests for case sensitivity.  A :no-write parameter may be passed if you want to disable writing of test files (which is tried last).
 
@@ -69,36 +74,46 @@ The os method takes a single argument, an operating system string, and returns a
 The parameter can be either an operating system string, or the last part of the name of a subclass ('Win32', 'Mac').  The default is `$*OS`, which gives you the same subclass that File::Spec already uses for your system.
 
 
-### path-components
+### split
 
 A close relative of `splitdir`, this function also splits a path into volume, directory, and basename portions.  Unlike splitdir, path-components returns paths compatible with dirname and basename.
 
-This means that trailing slashes will be eliminated from the directory and basename components, in Win32 and Unix-like environments.  The basename component will always contain the last part of the path, even if it is a directory, `'.'`, or `'..'`.
+This means that trailing slashes will be eliminated from the directory and basename components, in Win32 and Unix-like environments.  The basename component will always contain the last part of the path, even if it is a directory, `'.'`, or `'..'`.  If a relative path's directory portion would otherwise be empty, the directory is set to `'.'`.
 
 On systems with no concept of volume, returns `''` (the empty string) for volume.
 
 	($volume, $directories, $basename) =
-			File::Spec.path-components( $path );
+			File::Spec.split( $path );
 
-The results can be passed to `.join-path` to get back a path equivalent to (but not necessarily identical to) the original path.  If you want to keep all of the characters involved, use `.splitdir` instead.
+The results can be passed to `.join` to get back a path equivalent to (but not necessarily identical to) the original path.  If you want to keep all of the characters involved, use `.splitdir` instead.
 
+### Comparison of splitpath and split
 
-### join-path
-
-A close relative of `.catpath`, this function takes volume, directory and basename portions and returns an entire path.  Unlike dir, path-components returns paths compatible with dirname and basename.  
-
-	$full-path = File::Spec.join-path($volume, $dirname, $basename);
-
-Directory separators are inserted if necessary.  Under Unix, $volume is ignored, and only directory and basename are concatenated.  On other OSes, $volume is significant.
-
-This method is the inverse of `.path-components`; the results can be passed to it to get the volume, dirname, and basename portions back.
-
-### Comparison of path-components and splitpath
-
-	OS      Path       splitpath               path-components
+	OS      Path       splitpath               split
 	linux   /a/b/c     ("", "/a/b/", "c")      ("", "/a/b", "c")
 	linux   /a/b//c/   ("", "/a/b//c/", "")    ("", "/a/b", "c")
 	linux   /a/b/.     ("", "/a/b/.", "")      ("", "/a/b", ".")
 	Win32   C:\a\b\    ("C:", "\\a\\b\\", "")  ("C:", "\\a", "b")
 	VMS     A:[b.c]    ("A:", "[b.c]", "")     ("A:", "[b]", "[c]")
+
+
+### join
+
+A close relative of `.catpath`, this function takes volume, directory and basename portions and returns an entire path.  If the dirname is `'.'`, it is removed from the (relative) path output, because this function inverts the functionality of dirname and basename.
+
+	$full-path = File::Spec.join($volume, $dirname, $basename);
+
+Directory separators are inserted if necessary.  Under Unix, $volume is ignored, and only directory and basename are concatenated.  On other OSes, $volume is significant.
+
+This method is the inverse of `.split`; the results can be passed to it to get the volume, dirname, and basename portions back.
+
+
+### Comparison of catpath and join
+
+	OS     Components            catpath        join
+	linux  ("", "/a/b", "c")     /a/b/c         a/b/c
+	linux  ("", ".", "foo")      ./foo          foo
+        linux  ("", "/", "/")        //             /
+	Win32  ("C:", "\a", "b")     C:\a\b         C:\a\b
+	VMS    ("A:", "[b]", "[c]")  A:[b][c]       A:[b.c]
 

@@ -2,7 +2,7 @@ use File::Spec::Unix;
 class File::Spec::VMS is File::Spec::Unix;
 
 my $module = "File::Spec::Unix";
-#require $module;
+
 my $unix_report = _unix_rpt;
 my $dir_rx = regex {   '[' ~ ']'  <-[ \] ]>*
                      | '<' ~ '>'  <-[ \< ]>*
@@ -64,7 +64,7 @@ method splitpath ($path, $nofile = False) {
 	}
 }
 
-method path-components ($path, $nofile = False) {
+method split ($path, $nofile = False) {
 	#really, this is function is more proof-of-concept than anything workable.
 	# we need VMSify to do a good job here
 	my ($dev, $dir, $file) = ('','','');
@@ -119,7 +119,7 @@ method catpath ( $dev is copy, $dir is copy, $file ) {
 	"$dev$dir$file";
 }
 
-method join-path ($dev, $dirname is copy, $basename is copy) {
+method join ($dev, $dirname is copy, $basename is copy) {
 	if $dirname ne '' and $basename ~~ /^ '['/ {
 		$basename ~~ s/^ '['//;
 		$dirname  ~~ s/']' $/.$basename/;
@@ -138,9 +138,6 @@ method updir                 { $unix_report ?? '..' !! '[-]'       }
 method no_upwards            { ::($module).no_upwards()            }
 method case_tolerant         { True                                }
 method default_case_tolerant { True                                }
-method join                  { ::($module).join()                  }
-#method splitpath             { ::($module).splitpath()             }
 method splitdir              { ::($module).splitdir()              }
-#method catpath               { ::($module).catpath()               }
 method abs2rel               { ::($module).abs2rel()               }
 method rel2abs               { ::($module).rel2abs()               }

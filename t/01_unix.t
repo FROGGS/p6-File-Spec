@@ -4,7 +4,7 @@ use Test;
 use File::Spec;
 use File::Spec::Unix;
 
-plan 84;
+plan 107;
 
 my $Unix := File::Spec::Unix;
 
@@ -57,12 +57,6 @@ my $path = %*ENV{'PATH'};
 is_deeply $Unix.path, @want, 'path';
 %*ENV{'PATH'} = $path;
 
-is $Unix.join('a','b','c'),   'a/b/c', "join: ('a','b','c') -> 'a/b/c'";
-is $Unix.join('a','b','./c'), 'a/b/c', "join: ('a','b','./c') -> 'a/b/c'";
-is $Unix.join('./a','b','c'), 'a/b/c', "join: ('./a','b','c') -> 'a/b/c'";
-is $Unix.join('c'),           'c',     "join: 'c' -> 'c'";
-is $Unix.join('./c'),         'c',     "join: './c' -> 'c'";
-
 my %splitpath = (
 	'file'            => ('', '',             'file'),
 	'/d1/d2/d3/'      => ('', '/d1/d2/d3/',   ''),
@@ -75,9 +69,49 @@ my %splitpath = (
 	'/././d1/'        => ('', '/././d1/',     ''),
 );
 for %splitpath.kv -> $get, $want {
-	is $Unix.splitpath( $get ),
- $want, "splitpath: '$get' -> '$want'";
+	is $Unix.splitpath( $get ), $want, "splitpath: '$get' -> '$want'";
 }
+
+my %split = (
+	'/'               => ('', '/',             '/'),
+	'.'               => ('', '.',             '.'),
+	'file'            => ('', '.',          'file'),
+        'dir/'            => ('', '.',           'dir'),
+        '/dir/'           => ('', '/',           'dir'),
+	'/d1/d2/d3/'      => ('', '/d1/d2',       'd3'),
+	'd1/d2/d3/'       => ('', 'd1/d2',       'd3'),
+	'/d1/d2/d3/.'     => ('', '/d1/d2/d3',     '.'),
+	'/d1/d2/d3/..'    => ('', '/d1/d2/d3',    '..'),
+	'/d1/d2/d3/.file' => ('', '/d1/d2/d3', '.file'),
+	'd1/d2/d3/file'   => ('', 'd1/d2/d3',   'file'),
+	'/../../d1/'      => ('', '/../..',       'd1'),
+	'/././d1/'        => ('', '/./.',         'd1'),
+);
+for %split.kv -> $get, $want {
+	is $Unix.split( $get ), $want, "split: '$get' -> '$want'";
+}
+
+my @join = (
+	$('','.','.'),              '.',
+	$('','/','/'),              '/',
+        $('','.','file'),           'file',
+	$('','','file'),            'file',
+        $('','dir','.'),            'dir/.',
+	$('','/d1/d2/d3/',''),      '/d1/d2/d3/',
+	$('','d1/d2/d3/',''),       'd1/d2/d3/',
+	$('','/d1/d2/d3/.',''),     '/d1/d2/d3/.',
+	$('','/d1/d2/d3/..',''),    '/d1/d2/d3/..',
+	$('','/d1/d2/d3/','.file'), '/d1/d2/d3/.file',
+	$('','d1/d2/d3/','file'),   'd1/d2/d3/file',
+	$('','/../../d1/',''),      '/../../d1/',
+	$('','/././d1/',''),        '/././d1/',
+	$('d1','d2/d3/',''),        'd2/d3/',
+	$('d1','d2','d3/'),         'd2/d3/'
+);
+for @join -> $get, $want {
+	is $Unix.join( |$get ), $want, "join: '$get' -> '$want'";
+}
+
 
 my %splitdir = (
 	''           => '',
