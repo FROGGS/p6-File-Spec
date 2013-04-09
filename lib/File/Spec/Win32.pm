@@ -12,17 +12,11 @@ my $volume_rx   = regex { $<driveletter>=<$driveletter> | $<UNCpath>=<$UNCpath> 
 method canonpath ($path)         { canon-cat($path)               }
 
 method catdir(*@dirs)            {
-	# Legacy / compatibility support
 	return "" unless @dirs;
 	return canon-cat( "\\", |@dirs )
 		if @dirs[0] eq "";
 
-	# Compatibility with File::Spec <= 3.26:
-	#     catdir('A:', 'foo') should return 'A:\foo'.
-	if @dirs[0] ~~ /^<$driveletter>$/ {
-		return canon-cat( (@dirs[0]~'\\'), |@dirs[1..*] )
-	}
-	return canon-cat(|@dirs);
+	canon-cat(|@dirs);
 }
 method splitdir($dir)        { $dir.split($slash)                  }
 
