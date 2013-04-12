@@ -136,57 +136,6 @@ method catpath($volume is copy, $directory, $file) {
 	else 	{ $volume ~ $directory     ~    $file; }
 }
 
-method abs2rel( $path is copy, $base is copy = Str ) {
-	$base = $*CWD unless $base.defined && $base.chars;
-
-	$path = self.canonpath( $path );
-	$base = self.canonpath( $base );
-
-	if self.file-name-is-absolute($path) || self.file-name-is-absolute($base) {
-		$path = self.rel2abs( $path );
-		$base = self.rel2abs( $base );
-	}
-	else {
-		# save a couple of cwd()s if both paths are relative
-		$path = self.catdir( '/', $path );
-		$base = self.catdir( '/', $base );
-	}
-
-	my ($path_volume, $path_directories) = self.splitpath( $path, 1 );
-	my ($base_volume, $base_directories) = self.splitpath( $base, 1 );
-
-	# Can't relativize across volumes
-	return $path unless $path_volume eq $base_volume;
-
-	# For UNC paths, the user might give a volume like //foo/bar that
-	# strictly speaking has no directory portion.  Treat it as if it
-	# had the root directory for that volume.
-	if !$base_directories.chars && self.file-name-is-absolute( $base ) {
-		$base_directories = self.rootdir;
-	}
-
-	# Now, remove all leading components that are the same
-	my @pathchunks = self.splitdir( $path_directories );
-	my @basechunks = self.splitdir( $base_directories );
-
-	if $base_directories eq self.rootdir {
-		@pathchunks.shift;
-		return self.canonpath( self.catpath('', self.catdir( @pathchunks ), '') );
-	}
-
-	while @pathchunks && @basechunks && @pathchunks[0] eq @basechunks[0] {
-		@pathchunks.shift;
-		@basechunks.shift;
-	}
-	return self.curdir unless @pathchunks || @basechunks;
-
-	# $base now contains the directories the resulting relative path 
-	# must ascend out of before it can descend to $path_directory.
-	my $result_dirs = self.catdir( self.updir() xx @basechunks.elems, @pathchunks );
-	return self.canonpath( self.catpath('', $result_dirs, '') );
-}
-
-
 method rel2abs ($path is copy, $base? is copy) {
 
 	my $is_abs = self.file-name-is-absolute($path);
@@ -202,7 +151,7 @@ method rel2abs ($path is copy, $base? is copy) {
 		return self.canonpath( $vol ~ $path );
 	}
 
-	if $base.not || $base eq '' {
+	if not defined $base {
 		# TODO: implement _getdcwd call ( Windows maintains separate CWD for each volume )
 		#$base = Cwd::getdcwd( ($self->splitpath( $path ))[0] ) if defined &Cwd::getdcwd ;
 		#$base = $*CWD unless defined $base ;
