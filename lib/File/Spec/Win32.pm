@@ -22,7 +22,10 @@ method catfile(|c)           { self.catdir(|c)                     }
 method devnull               { 'nul'                               }
 method rootdir               { '\\'                                }
 
-has @!tmpdircandidates = (
+method tmpdir {
+	state $tmpdir;
+	return $tmpdir if $tmpdir.defined;
+	$tmpdir = self._firsttmpdir(
 		%*ENV<TMPDIR>,
 		%*ENV<TEMP>,
 		%*ENV<TMP>,
@@ -31,24 +34,9 @@ has @!tmpdircandidates = (
 		'C:/temp',
 		'/tmp',
 		'/',
-		'.'
-);
-
-#method tmpdir {
-# 	state $tmpdir;
-# 	return $tmpdir if $tmpdir.defined;
-# 	$tmpdir = self._firsttmpdir(
-# 		%*ENV<TMPDIR>,
-# 		%*ENV<TEMP>,
-# 		%*ENV<TMP>,
-# 		'SYS:/temp',
-# 		'C:\system\temp',
-# 		'C:/temp',
-# 		'/tmp',
-# 		'/',
-# 		self.curdir
-# 	);
-# }
+		self.curdir
+	);
+}
 
 method path {
 	my @path = split(';', %*ENV<PATH>);
@@ -71,8 +59,6 @@ method file-name-is-absolute ($path) {
 }
 
 method split ($path as Str is copy) { 
-
-	my ($volume, $directory, $file) = ('','','');
 	$path ~~ s[ <$slash>+ $] = ''                       #=
 		unless $path ~~ /^ <$driveletter>? <$slash>+ $/;
 
@@ -81,9 +67,7 @@ method split ($path as Str is copy) {
 		( [ .* <$slash> ]? )
 		(.*)
 	     /;
-	$volume    = ~$0;
-	$directory = ~$1;
-	$file      = ~$2;
+	my ($volume, $directory, $file) = (~$0, ~$1, ~$2);
         $directory ~~ s/ <?after .> <$slash>+ $//;
 
 	$file = '\\'      if $directory eq any('/', '\\') && $file eq '';
