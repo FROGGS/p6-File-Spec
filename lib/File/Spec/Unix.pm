@@ -153,16 +153,14 @@ method catfile( *@parts is copy ) {
 method abs2rel( $path is copy, $base is copy = Str ) {
 	$base = $*CWD unless $base.defined && $base.chars;
 
-	$path = self.canonpath( $path );
-	$base = self.canonpath( $base );
-
 	if self.file-name-is-absolute($path) || self.file-name-is-absolute($base) {
 		$path = self.rel2abs( $path );
 		$base = self.rel2abs( $base );
 	}
 	else {
-		$path = self.catdir( '/', $path );
-		$base = self.catdir( '/', $base );
+		# save a couple of cwd()s if both paths are relative
+		$path = self.catdir( self.rootdir, $path );
+		$base = self.catdir( self.rootdir, $base );
 	}
 
 	my ($path_volume, $path_directories) = self.splitpath( $path, 1 );
