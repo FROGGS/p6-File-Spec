@@ -8,13 +8,10 @@ method canonpath( $path is copy ) {
 	# may be interpreted in an implementation-defined manner, although
 	# more than two leading slashes shall be treated as a single slash.")
 	my $node = '';
-	my $double_slashes_special = $*OS eq 'qnx' || $*OS eq 'nto';
-
-
-	if $double_slashes_special
-	&& ( $path ~~ s {^ ( '//' <-[ '/' ]>+ ) '/'? $} = '' || $path ~~ s { ^ ( '//' <-[ '/' ]>+ ) '/' } = '/' ) {
-		$node = $0;
-	}
+	if BEGIN { so $*OS eq 'qnx'|'nto' }   #double slashes special on these OSes
+	   && (   $path ~~ s {^ ( '//' <-[ / ]>+ ) '/'? $} = ''
+               || $path ~~ s {^ ( '//' <-[ / ]>+ ) '/' }   = '/' )
+	           { $node = ~ $0; }
 
 	# xx////xx  -> xx/xx
 	$path ~~ s:g { '/'+ }       = '/';
