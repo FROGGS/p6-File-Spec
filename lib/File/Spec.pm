@@ -41,8 +41,8 @@ method path                                 { ::($module).path()                
 method splitpath( $path, $no_file = False ) { ::($module).splitpath( $path, $no_file )         }
 method splitdir( $path )                    { ::($module).splitdir( $path )                    }
 method catpath( $volume, $directory, $file) { ::($module).catpath( $volume, $directory, $file) }
-method abs2rel( $path, $base = Str )        { ::($module).abs2rel( $path, $base )              }
-method rel2abs( $path, $base = Str )        { ::($module).rel2abs( $path, $base )              }
+method abs2rel( |c )                        { ::($module).abs2rel( |c )                        }
+method rel2abs( |c )                        { ::($module).rel2abs( |c )                        }
 method case-tolerant( $path = $*CWD )       { ::($module).case-tolerant( $path )               }
 
 method split ( $path )                       { ::($module).split( $path )                      }

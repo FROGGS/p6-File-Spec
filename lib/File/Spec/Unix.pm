@@ -161,7 +161,6 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 		$base = self.rel2abs( $base );
 	}
 	else {
-		# save a couple of cwd()s if both paths are relative
 		$path = self.catdir( '/', $path );
 		$base = self.catdir( '/', $base );
 	}
@@ -200,13 +199,9 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 	return self.canonpath( self.catpath('', $result_dirs, '') );
 }
 
-method rel2abs( $path, $base is copy = Str) {
+method rel2abs( $path, $base is copy = $*CWD) {
 	return self.canonpath($path) if self.file-name-is-absolute($path);
-	# Figure out the effective $base and clean it up.
-	if !$base.defined {
-		$base = $*CWD;
-	}
-	elsif !self.file-name-is-absolute( $base ) {
+	if !self.file-name-is-absolute( $base ) {
 		$base = self.rel2abs( $base )
 	}
 	self.catdir( $base, $path );
