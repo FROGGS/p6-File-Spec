@@ -200,25 +200,16 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 	return self.canonpath( self.catpath('', $result_dirs, '') );
 }
 
-method rel2abs( $path is copy, $base is copy = Str ) {
-	# Clean up $path
-	if !self.file-name-is-absolute( $path ) {
-		# Figure out the effective $base and clean it up.
-		if !$base.defined || $base eq '' {
-			$base = $*CWD;
-		}
-		elsif !self.file-name-is-absolute( $base ) {
-			$base = self.rel2abs( $base )
-		}
-		else {
-			$base = self.canonpath( $base )
-		}
-
-		# Glom them together
-		$path = self.catdir( $base, $path )
+method rel2abs( $path, $base is copy = Str) {
+	return self.canonpath($path) if self.file-name-is-absolute($path);
+	# Figure out the effective $base and clean it up.
+	if !$base.defined {
+		$base = $*CWD;
 	}
-
-	return self.canonpath( $path )
+	elsif !self.file-name-is-absolute( $base ) {
+		$base = self.rel2abs( $base )
+	}
+	self.catdir( $base, $path );
 }
 
 method case-tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
