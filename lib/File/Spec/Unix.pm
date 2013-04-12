@@ -85,7 +85,7 @@ method path {
 }
 
 method splitpath( $path, $nofile = False ) {
-	my ( $volume, $directory, $file ) = ( '', '', '' );
+	my ( $directory, $file ) = ( '', '' );
 
 	if $nofile {
 		$directory = $path;
@@ -96,23 +96,22 @@ method splitpath( $path, $nofile = False ) {
 		$file      = ~$1;
 	}
 
-	return ( $volume, $directory, $file );
+	return ( '', $directory, $file );
 }
 
 method split (Mu:D $path is copy ) {
-	my ( $volume, $directory, $file ) = ( '', '', '' );
+	$path  ~~ s/<?after .> '/'+ $ //;
 
-	$path      ~~ s/<?after .> '/'+ $ //;
-	$path      ~~ m/^ ( [ .* \/ ]? ) (<-[\/]>*) /;
-	$directory = ~$0;
-	$file      = ~$1;
+	$path  ~~ m/^ ( [ .* \/ ]? ) (<-[\/]>*) /;
+	my ($directory, $file) = ~$0, ~$1;
+
 	$directory ~~ s/<?after .> '/'+ $ //; #/
 
 	$file = '/'      if $directory eq '/' && $file eq '';
 	$directory = '.' if $directory eq ''  && $file ne '';
 	    # shell dirname '' produces '.', but we don't because it's probably user error
 
-	return ( $volume, $directory, $file );
+	return ( '', $directory, $file );
 }
 
 
@@ -137,18 +136,8 @@ method catpath( $volume, $directory is copy, $file ) {
 }
 
 method catdir( *@parts ) { self.canonpath( (@parts, '').join('/') ) }
-
-method splitdir( $path ) {
-	return $path.split( /\// )
-}
-
-method catfile( *@parts is copy ) {
-	my $file = self.canonpath( @parts.pop );
-	return $file unless @parts.elems;
-	my $dir  = self.catdir( @parts );
-	$dir    ~= '/' unless $dir.substr(*-1) eq '/';
-	return $dir ~ $file;
-}
+method splitdir( $path ) { $path.split( /\// )  }
+method catfile( |c )     { self.catdir(|c) }
 
 method abs2rel( $path is copy, $base is copy = Str ) {
 	$base = $*CWD unless $base.defined && $base.chars;
