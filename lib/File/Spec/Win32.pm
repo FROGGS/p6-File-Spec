@@ -13,9 +13,7 @@ method canonpath ($path)         { canon-cat($path)               }
 
 method catdir(*@dirs)            {
 	return "" unless @dirs;
-	return canon-cat( "\\", |@dirs )
-		if @dirs[0] eq "";
-
+	return canon-cat( "\\", |@dirs ) if @dirs[0] eq "";
 	canon-cat(|@dirs);
 }
 method splitdir($dir)        { $dir.split($slash)                  }
@@ -24,10 +22,7 @@ method catfile(|c)           { self.catdir(|c)                     }
 method devnull               { 'nul'                               }
 method rootdir               { '\\'                                }
 
-method tmpdir {
-	state $tmpdir;
-	return $tmpdir if $tmpdir.defined;
-	$tmpdir = self._firsttmpdir(
+has @!tmpdircandidates = (
 		%*ENV<TMPDIR>,
 		%*ENV<TEMP>,
 		%*ENV<TMP>,
@@ -36,9 +31,24 @@ method tmpdir {
 		'C:/temp',
 		'/tmp',
 		'/',
-		self.curdir
-	);
-}
+		'.'
+);
+
+#method tmpdir {
+# 	state $tmpdir;
+# 	return $tmpdir if $tmpdir.defined;
+# 	$tmpdir = self._firsttmpdir(
+# 		%*ENV<TMPDIR>,
+# 		%*ENV<TEMP>,
+# 		%*ENV<TMP>,
+# 		'SYS:/temp',
+# 		'C:\system\temp',
+# 		'C:/temp',
+# 		'/tmp',
+# 		'/',
+# 		self.curdir
+# 	);
+# }
 
 method path {
 	my @path = split(';', %*ENV<PATH>);
@@ -85,7 +95,8 @@ method split ($path as Str is copy) {
 method join ($volume, $directory is copy, $file) { 
 	$directory = '' if all($directory, $file) eq any('/','\\')
                         or $directory eq '.' && $file.chars;
-	self.catpath($volume, $directory, $file)  }
+	self.catpath($volume, $directory, $file);
+}
 
 method splitpath($path as Str, $nofile as Bool = False) { 
 
