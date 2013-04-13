@@ -4,11 +4,10 @@ use Test;
 use File::Spec;
 use File::Spec::Cygwin;
 
-plan 74;
+plan 104;
 my $cygwin = File::Spec::Cygwin;
 
-say "# File::Spec::cygwin";
-say "# canonpath tests";
+say "# File::Spec::Cygwin";
 my @canonpath =
 	'///../../..//./././a//b/.././c/././',   '/a/b/../c',
 	'',                       '',
@@ -18,12 +17,13 @@ my @canonpath =
 	'/a/./',                  '/a',
 	'/a/.',                   '/a',
 	'/../../',                '/',
-	'/../..',                 '/';
+	'/../..',                 '/',
+        'a:\\b\\c',               'a:/b/c',
+	'c:a\\.\\b',              'c:a/b';
 for @canonpath -> $in, $out {
 	is $cygwin.canonpath($in), $out, "canonpath: '$in' -> '$out'";
 }
 
-say "# splitdir tests";
 my @splitdir =
 	'',           '',
 	'/d1/d2/d3/', ',d1,d2,d3,',
@@ -35,31 +35,69 @@ for @splitdir -> $in, $out {
 	is $cygwin.splitdir(|$in).join(','), $out, "splitdir: '$in' -> '$out'"
 }
 
-say "# catdir tests";
 is $cygwin.catdir(),                        '', "No argument returns empty string";
 my @catdir =
-	$( ),                   '',
+	$( ),                    '',
 	$('/'),                  '/',
 	$('','d1','d2','d3',''), '/d1/d2/d3',
 	$('d1','d2','d3',''),    'd1/d2/d3',
 	$('','d1','d2','d3'),    '/d1/d2/d3',
 	$('d1','d2','d3'),       'd1/d2/d3',
-	$('/','d2/d3'),     '/d2/d3';
+	$('/','d2/d3'),          '/d2/d3',
+        $('/','/d1/d2'),         '/d1/d2',
+        $('//notreally','/UNC'), '/notreally/UNC';
 for @catdir -> $in, $out {
 	is $cygwin.catdir(|$in), $out, "catdir: {$in.perl} -> '$out'";
 }
 
+my @split = 
+	'/',               ',/,/',
+	'.',               ',.,.',
+	'file',            ',.,file',
+	'/dir',            ',/,dir',
+	'/d1/d2/d3/',      ',/d1/d2,d3',
+	'd1/d2/d3/',       ',d1/d2,d3',
+	'/d1/d2/d3/.',     ',/d1/d2/d3,.',
+	'/d1/d2/d3/..',    ',/d1/d2/d3,..',
+	'/d1/d2/d3/.file', ',/d1/d2/d3,.file',
+	'd1/d2/d3/file',   ',d1/d2/d3,file',
+	'/../../d1/',      ',/../..,d1',
+	'/././d1/',        ',/./.,d1',
+	'c:/d1\\d2\\',    'c:,/d1,d2',
+        '//unc/share',     '//unc/share,/,/';
+for @split -> $in, $out {
+	is $cygwin.split(|$in).join(','), $out, "split: {$in.perl} -> '$out'"
+}
+
+say "# join tests";
+my @join = 
+	$('','','file'),            'file',
+	$('','/d1/d2/d3/',''),      '/d1/d2/d3/',
+	$('','d1/d2/d3/',''),       'd1/d2/d3/',
+	$('','/d1/d2/d3/.',''),     '/d1/d2/d3/.',
+	$('','/d1/d2/d3/..',''),    '/d1/d2/d3/..',
+	$('','/d1/d2/d3/','.file'), '/d1/d2/d3/.file',
+	$('','d1/d2/d3/','file'),   'd1/d2/d3/file',
+	$('','/../../d1/',''),      '/../../d1/',
+	$('','/././d1/',''),        '/././d1/',
+	$('d:','d2/d3/',''),        'd:d2/d3/',
+	$('d:/','d2','d3/'),        'd:/d2/d3/';
+for @join -> $in, $out {
+	is $cygwin.join(|$in), $out, "join: {$in.perl} -> '$out'"
+}
+
+
 say "# splitpath tests";
 my @splitpath = 
-	$('file'),            ',,file',
-	$('/d1/d2/d3/'),      ',/d1/d2/d3/,',
-	$('d1/d2/d3/'),       ',d1/d2/d3/,',
-	$('/d1/d2/d3/.'),     ',/d1/d2/d3/.,',
-	$('/d1/d2/d3/..'),    ',/d1/d2/d3/..,',
-	$('/d1/d2/d3/.file'), ',/d1/d2/d3/,.file',
-	$('d1/d2/d3/file'),   ',d1/d2/d3/,file',
-	$('/../../d1/'),      ',/../../d1/,',
-	$('/././d1/'),        ',/././d1/,';
+	'file',            ',,file',
+	'/d1/d2/d3/',      ',/d1/d2/d3/,',
+	'd1/d2/d3/',       ',d1/d2/d3/,',
+	'/d1/d2/d3/.',     ',/d1/d2/d3/.,',
+	'/d1/d2/d3/..',    ',/d1/d2/d3/..,',
+	'/d1/d2/d3/.file', ',/d1/d2/d3/,.file',
+	'd1/d2/d3/file',   ',d1/d2/d3/,file',
+	'/../../d1/',      ',/../../d1/,',
+	'/././d1/',        ',/././d1/,';
 for @splitpath -> $in, $out {
 	is $cygwin.splitpath(|$in).join(','), $out, "splitpath: {$in.perl} -> '$out'"
 }
@@ -103,7 +141,6 @@ my @abs2rel =
 	$('///','/t1/t2/t3'),                '../../..',
 	$('/.','/t1/t2/t3'),                 '../../..',
 	$('/./','/t1/t2/t3'),                '../../..',
-#	$('../t4','/t1/t2/t3'),              '../t4',
 	$('/t1/t2/t3', '/'),                 't1/t2/t3',
 	$('/t1/t2/t3', '/t1'),               't2/t3',
 	$('t1/t2/t3', 't1'),                 't2/t3',
@@ -137,14 +174,9 @@ if $*OS !~~ any(<cygwin>) {
 }
 else {
 	# double check a couple of things to see if File::Spec loaded correctly
-	#is File::Spec.devnull, '/dev/null', 'devnull is nul';
-	is File::Spec.rootdir, '\\',  'rootdir is "\\"';
-	#tmpdir
-	#no-upwards
+	is File::Spec.rootdir, '\\',  'File::Spec loads Cygwin';
+	ok {.IO.d && .IO.w}.(File::Spec.tmpdir), "tmpdir: {File::Spec.tmpdir} is a writable directory";
 	is File::Spec.case-tolerant, True, 'case-tolerant is True';
-
-	#join
-
 }
 
 done;
