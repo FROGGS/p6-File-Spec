@@ -4,7 +4,7 @@ use Test;
 use File::Spec;
 use File::Spec::Cygwin;
 
-plan 74;
+plan 80;
 my $cygwin = File::Spec::Cygwin;
 
 say "# File::Spec::cygwin";
@@ -18,7 +18,9 @@ my @canonpath =
 	'/a/./',                  '/a',
 	'/a/.',                   '/a',
 	'/../../',                '/',
-	'/../..',                 '/';
+	'/../..',                 '/',
+        'a:\\b\\c',               'a:/b/c',
+	'c:a\\.\\b',              'c:a/b';
 for @canonpath -> $in, $out {
 	is $cygwin.canonpath($in), $out, "canonpath: '$in' -> '$out'";
 }
@@ -38,13 +40,15 @@ for @splitdir -> $in, $out {
 say "# catdir tests";
 is $cygwin.catdir(),                        '', "No argument returns empty string";
 my @catdir =
-	$( ),                   '',
+	$( ),                    '',
 	$('/'),                  '/',
 	$('','d1','d2','d3',''), '/d1/d2/d3',
 	$('d1','d2','d3',''),    'd1/d2/d3',
 	$('','d1','d2','d3'),    '/d1/d2/d3',
 	$('d1','d2','d3'),       'd1/d2/d3',
-	$('/','d2/d3'),     '/d2/d3';
+	$('/','d2/d3'),          '/d2/d3',
+        $('/','/d1/d2'),         '/d1/d2',
+        $('//notreally','/UNC'), '/notreally/UNC';
 for @catdir -> $in, $out {
 	is $cygwin.catdir(|$in), $out, "catdir: {$in.perl} -> '$out'";
 }
@@ -103,7 +107,6 @@ my @abs2rel =
 	$('///','/t1/t2/t3'),                '../../..',
 	$('/.','/t1/t2/t3'),                 '../../..',
 	$('/./','/t1/t2/t3'),                '../../..',
-#	$('../t4','/t1/t2/t3'),              '../t4',
 	$('/t1/t2/t3', '/'),                 't1/t2/t3',
 	$('/t1/t2/t3', '/t1'),               't2/t3',
 	$('t1/t2/t3', 't1'),                 't2/t3',
@@ -137,14 +140,9 @@ if $*OS !~~ any(<cygwin>) {
 }
 else {
 	# double check a couple of things to see if File::Spec loaded correctly
-	#is File::Spec.devnull, '/dev/null', 'devnull is nul';
-	is File::Spec.rootdir, '\\',  'rootdir is "\\"';
-	#tmpdir
-	#no-upwards
+	is File::Spec.rootdir, '\\',  'File::Spec loads Cygwin';
+	ok {.IO.d && .IO.w}.(File::Spec.tmpdir), "tmpdir: {File::Spec.tmpdir} is a writable directory";
 	is File::Spec.case-tolerant, True, 'case-tolerant is True';
-
-	#join
-
 }
 
 done;
