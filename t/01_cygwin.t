@@ -4,11 +4,10 @@ use Test;
 use File::Spec;
 use File::Spec::Cygwin;
 
-plan 80;
+plan 104;
 my $cygwin = File::Spec::Cygwin;
 
-say "# File::Spec::cygwin";
-say "# canonpath tests";
+say "# File::Spec::Cygwin";
 my @canonpath =
 	'///../../..//./././a//b/.././c/././',   '/a/b/../c',
 	'',                       '',
@@ -25,7 +24,6 @@ for @canonpath -> $in, $out {
 	is $cygwin.canonpath($in), $out, "canonpath: '$in' -> '$out'";
 }
 
-say "# splitdir tests";
 my @splitdir =
 	'',           '',
 	'/d1/d2/d3/', ',d1,d2,d3,',
@@ -37,7 +35,6 @@ for @splitdir -> $in, $out {
 	is $cygwin.splitdir(|$in).join(','), $out, "splitdir: '$in' -> '$out'"
 }
 
-say "# catdir tests";
 is $cygwin.catdir(),                        '', "No argument returns empty string";
 my @catdir =
 	$( ),                    '',
@@ -53,17 +50,54 @@ for @catdir -> $in, $out {
 	is $cygwin.catdir(|$in), $out, "catdir: {$in.perl} -> '$out'";
 }
 
+my @split = 
+	'/',               ',/,/',
+	'.',               ',.,.',
+	'file',            ',.,file',
+	'/dir',            ',/,dir',
+	'/d1/d2/d3/',      ',/d1/d2,d3',
+	'd1/d2/d3/',       ',d1/d2,d3',
+	'/d1/d2/d3/.',     ',/d1/d2/d3,.',
+	'/d1/d2/d3/..',    ',/d1/d2/d3,..',
+	'/d1/d2/d3/.file', ',/d1/d2/d3,.file',
+	'd1/d2/d3/file',   ',d1/d2/d3,file',
+	'/../../d1/',      ',/../..,d1',
+	'/././d1/',        ',/./.,d1',
+	'c:/d1\\d2\\',    'c:,/d1,d2',
+        '//unc/share',     '//unc/share,/,/';
+for @split -> $in, $out {
+	is $cygwin.split(|$in).join(','), $out, "split: {$in.perl} -> '$out'"
+}
+
+say "# join tests";
+my @join = 
+	$('','','file'),            'file',
+	$('','/d1/d2/d3/',''),      '/d1/d2/d3/',
+	$('','d1/d2/d3/',''),       'd1/d2/d3/',
+	$('','/d1/d2/d3/.',''),     '/d1/d2/d3/.',
+	$('','/d1/d2/d3/..',''),    '/d1/d2/d3/..',
+	$('','/d1/d2/d3/','.file'), '/d1/d2/d3/.file',
+	$('','d1/d2/d3/','file'),   'd1/d2/d3/file',
+	$('','/../../d1/',''),      '/../../d1/',
+	$('','/././d1/',''),        '/././d1/',
+	$('d:','d2/d3/',''),        'd:d2/d3/',
+	$('d:/','d2','d3/'),        'd:/d2/d3/';
+for @join -> $in, $out {
+	is $cygwin.join(|$in), $out, "join: {$in.perl} -> '$out'"
+}
+
+
 say "# splitpath tests";
 my @splitpath = 
-	$('file'),            ',,file',
-	$('/d1/d2/d3/'),      ',/d1/d2/d3/,',
-	$('d1/d2/d3/'),       ',d1/d2/d3/,',
-	$('/d1/d2/d3/.'),     ',/d1/d2/d3/.,',
-	$('/d1/d2/d3/..'),    ',/d1/d2/d3/..,',
-	$('/d1/d2/d3/.file'), ',/d1/d2/d3/,.file',
-	$('d1/d2/d3/file'),   ',d1/d2/d3/,file',
-	$('/../../d1/'),      ',/../../d1/,',
-	$('/././d1/'),        ',/././d1/,';
+	'file',            ',,file',
+	'/d1/d2/d3/',      ',/d1/d2/d3/,',
+	'd1/d2/d3/',       ',d1/d2/d3/,',
+	'/d1/d2/d3/.',     ',/d1/d2/d3/.,',
+	'/d1/d2/d3/..',    ',/d1/d2/d3/..,',
+	'/d1/d2/d3/.file', ',/d1/d2/d3/,.file',
+	'd1/d2/d3/file',   ',d1/d2/d3/,file',
+	'/../../d1/',      ',/../../d1/,',
+	'/././d1/',        ',/././d1/,';
 for @splitpath -> $in, $out {
 	is $cygwin.splitpath(|$in).join(','), $out, "splitpath: {$in.perl} -> '$out'"
 }

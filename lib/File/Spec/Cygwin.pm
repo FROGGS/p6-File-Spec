@@ -45,7 +45,7 @@ method tmpdir {
 
 #| Paths might have a volume, so we use Win32 splitpath and catpath instead
 method splitpath (|c)         { File::Spec::Win32.splitpath(|c) }
-method catpath (|c)           { File::Spec::Win32.catpath(|c).subst(:global, '\\', '/') }
-method split ($path)          { File::Spec::Win32.split($path)      }
+method catpath (|c)           { File::Spec::Win32.catpath(|c).subst(:global, '\\', '/')  }
+method split ($path)          { File::Spec::Win32.split($path)».subst(:global, '\\', '/')}
 method join (|c)              { File::Spec::Win32.join(|c).subst(:global, '\\', '/')     }
 method default-case-tolerant  { True                                }
