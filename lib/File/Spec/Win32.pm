@@ -9,18 +9,18 @@ my $UNCpath     = regex { [<$slash> ** 2] <-[\\\/]>+  <$slash>  [<-[\\\/]>+ | $]
 my $volume_rx   = regex { $<driveletter>=<$driveletter> | $<UNCpath>=<$UNCpath> }
 
 
-method canonpath ($path)         { canon-cat($path)               }
+method canonpath ($path)     { canon-cat($path)    }
 
-method catdir(*@dirs)            {
+method catdir(*@dirs) {
 	return "" unless @dirs;
 	return canon-cat( "\\", |@dirs ) if @dirs[0] eq "";
 	canon-cat(|@dirs);
 }
-method splitdir($dir)        { $dir.split($slash)                  }
+method splitdir($dir)        { $dir.split($slash)  }
 
-method catfile(|c)           { self.catdir(|c)                     }
-method devnull               { 'nul'                               }
-method rootdir               { '\\'                                }
+method catfile(|c)           { self.catdir(|c)     }
+method devnull               { 'nul'               }
+method rootdir               { '\\'                }
 
 method tmpdir {
 	state $tmpdir;
@@ -46,7 +46,7 @@ method path {
 	return @path;
 }
 
-method default-case-tolerant     { True                                     }
+method default-case-tolerant  { True        }
 
 method file-name-is-absolute ($path) {
 	# As of right now, this returns 2 if the path is absolute with a
@@ -136,10 +136,10 @@ method rel2abs ($path is copy, $base? is copy) {
 	}
 
 	if not defined $base {
-		# TODO: implement _getdcwd call ( Windows maintains separate CWD for each volume )
-		#$base = Cwd::getdcwd( ($self->splitpath( $path ))[0] ) if defined &Cwd::getdcwd ;
-		#$base = $*CWD unless defined $base ;
-		$base = $*CWD;
+	# TODO: implement _getdcwd call ( Windows maintains separate CWD for each volume )
+	# See: http://msdn.microsoft.com/en-us/library/1e5zwe0c%28v=vs.80%29.aspx
+		$base = Cwd::getdcwd( (self.splitpath: $path)[0] ) if defined &Cwd::getdcwd ;
+		$base //= $*CWD ;
 	}
 	elsif ( !self.file-name-is-absolute( $base ) ) {
 		$base = self.rel2abs( $base );
@@ -217,7 +217,3 @@ sub canon-cat ( $first is copy, *@rest ) {
 
 	return $path ne "" || $volume ?? $volume ~ $path !! ".";
 }
-
-
-
-
