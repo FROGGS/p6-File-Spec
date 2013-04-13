@@ -14,28 +14,20 @@ method canonpath( $path is copy ) {
 	           { $node = ~ $0; }
 
 	# xx////xx  -> xx/xx
-	$path ~~ s:g { '/'+ }       = '/';
+	$path ~~ s:g { '/'+ }              = '/';
 
 	# xx/././xx -> xx/xx
-	$path ~~ s:g { '/.'+ '/' }  = '/';
-
-	# xx/././xx -> xx/xx
-	$path ~~ s:g { '/.'+ $ }    = '/';
+	$path ~~ s:g { '/.'+ ['/' | $] }   = '/';     #:
 
 	# ./xx      -> xx
-	unless $path eq "./" {
-		$path ~~ s { ^ './'+ }  = '';
-	}
+	$path ~~ s { ^ './' <!before $> }  = '';   #=
 
-	# /../../xx -> xx
-	$path ~~ s { ^ '/' '../'+ } = '/';
-
-	# /..       -> /
-	$path ~~ s { ^ '/..' $ }    = '/';
+	# /../..(/xx) -> /(xx)
+	$path ~~ s { ^ '/..'+ ['/' | $] }  = '/';   
 
 	# xx/       -> xx
 	unless $path eq "/" {
-		$path ~~ s { '/' $ }    = '';
+		$path ~~ s { '/' $ }       = '';
 	}
 
 	return "$node$path";
