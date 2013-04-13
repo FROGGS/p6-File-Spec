@@ -135,7 +135,7 @@ method curdir                { $unix_report ?? '.' !! '[]'         }
 method devnull               { $unix_report ?? '/dev/null' !! "_NLA0:" }
 method rootdir               { ::($module).rootdir()               }
 method updir                 { $unix_report ?? '..' !! '[-]'       }
-method no_upwards            { ::($module).no_upwards()            }
+method no-parent-or-current-test  { ::($module).no-parent-or-current-test }
 method case_tolerant         { True                                }
 method default_case_tolerant { True                                }
 method splitdir              { ::($module).splitdir()              }

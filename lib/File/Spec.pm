@@ -33,7 +33,7 @@ method devnull                              { ::($module).devnull()             
 method rootdir                              { ::($module).rootdir()                            }
 method tmpdir                               { ::($module).tmpdir()                             }
 method updir                                { ::($module).updir()                              }
-method no-upwards( *@paths )                { ::($module).no_upwards( @paths )                 }
+method no-parent-or-current-test            { ::($module).no-parent-or-current-test            }
 method default-case-tolerant                { ::($module).default-case-tolerant()              }
 method file-name-is-absolute( $file )       { ::($module).file-name-is-absolute( $file )       }
 method path                                 { ::($module).path()                               }

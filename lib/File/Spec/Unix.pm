@@ -46,10 +46,7 @@ method tmpdir {
 	                 );
 }
 
-method no-upwards( *@paths ) {
-	my @no_upwards = grep { $_ !~~ /^[\.|\.\.]$/ }, @paths;
-	return @no_upwards;
-}
+method no-parent-or-current-test { none('.', '..')  }
 
 method file-name-is-absolute( $file ) {
 	so $file ~~ m/^\//

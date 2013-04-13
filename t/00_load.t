@@ -8,7 +8,7 @@ plan 27;
 eval_lives_ok 'use File::Spec', 'we can use File::Spec';
 ok $*OS,                        "your operating system is $*OS";
 _can_ok $_ for <canonpath catdir catfile curdir devnull rootdir tmpdir
-                updir no-upwards case-tolerant default-case-tolerant
+                updir no-parent-or-current-test case-tolerant default-case-tolerant
                 file-name-is-absolute path splitpath splitdir catpath
                 split join abs2rel rel2abs os>;
 

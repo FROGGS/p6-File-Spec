@@ -9,32 +9,36 @@ Usage:
 
 Methods (current state):
 
-	                       Unix   Mac   Win32  VMS Cygwin Epoc
-	canonpath              done  done   done        done  done 
-	catdir                 done         done        done  done
-	catfile                done         done        done  done
-	curdir                 done  done   done  done  done  done
-	devnull                done  done   done  done  done  done
-	rootdir                done         done        done  done
-	tmpdir                 done  done   done  done  done  done
-	updir                  done  done   done  done  done  done
-	no-upwards             done         done        done  done
-	case-tolerant          done  done   done  done  done  done
-	file-name-is-absolute  done  done   done  done  done  done
-	path                   done         done  done  done  done
-	splitpath              done  done   done   ~~   done  done
-	splitdir               done         done        done  done
-	catpath                done         done   ~~   done  done
-	abs2rel                done         done        done  done
-	rel2abs                done         done        done  done
-	split                  done         done   ~~   done  done
-	join                   done         done   ~~   done  done
+	                          Unix   Mac   Win32  VMS Cygwin
+	canonpath                 done  done   done        done
+	no-parent-or-current-test done         done        done
+	devnull                   done  done   done  done  done
+	curdir                    done  done   done  done  done
+	updir                     done  done   done  done  done
+	rootdir                   done         done        done
+	tmpdir                    done  done   done  done  done
+	path                      done         done  done  done
+	file-name-is-absolute     done  done   done  done  done
+	split                     done         done   ~~   done
+	join                      done         done   ~~   done
+	splitpath                 done  done   done   ~~   done
+	catpath                   done         done   ~~   done
+	splitdir                  done         done        done
+	catdir                    done         done        done
+	catfile                   done         done        done
+	abs2rel                   done         done        done
+	rel2abs                   done         done        done
+	case-tolerant             done  done   done  done  done
 
 '~~' means partially implemented, but not passing tests.
 
 ## Ported methods
 
 See [Perl 5 File::Spec](http://search.cpan.org/~smueller/PathTools-3.40/lib/File/Spec.pm) for now.  The methods are the same, but use dots instead of arrows.
+
+## Removed methods
+
+Method `no_updirs` is gone, because its use case is handled automatically by `dir()`.  For the test that supplies dir with its functionality, see new method `no-parent-or-current-test`.
 
 ## Changed methods
 
@@ -116,3 +120,19 @@ This method is the inverse of `.split`; the results can be passed to it to get t
 	Win32  ("C:", "\a", "b")     C:\a\b         C:\a\b
 	VMS    ("A:", "[b]", "[c]")  A:[b][c]       A:[b.c]
 
+### no-parent-or-current-test
+
+Returns a test as to whether a given path is identical to the parent or the current directory.  This is used automatically by `dir()` for directory listings, so under normal circumstances you shouldn't need to use it directly.
+
+	'file' ~~ File::Spec.no-parent-or-current-test    #False
+	'.'    ~~ File::Spec.no-parent-or-current-test    #True
+	'..'   ~~ File::Spec.no-parent-or-current-test    #True
+
+This can, however, be used to extend `dir()` through its `$test` parameter:
+
+	dir( "my/directory", test=>
+		all(File::Spec.no-parent-or-current-test, /^ '.' /));
+
+This example would return all files begining with a period that are not `.` or `..` directories.
+
+This replaces the functionality the old `no-updirs` method.
