@@ -4,11 +4,10 @@ my %module = (
 	'MacOS'   => 'Mac',
 	<MSWin32 os2 dos NetWare symbian> »=>» 'Win32',
 	'VMS'     => 'VMS',
-	'epoc'    => 'Epoc',
 	'cygwin'  => 'Cygwin',
 	# in case someone passes a module name instead of an OS string
 	#  map it to themselves
-	<Unix Mac Win32 Epoc Cygwin> »xx» 2
+	<Unix Mac Win32 Cygwin> »xx» 2
 );
 
 $module = "File::Spec::" ~ (%module{$*OS} // 'Unix');
@@ -20,7 +19,7 @@ method MODULE                            { $module; }  # for introspection
 #| Returns a copy of the module for the given OS string
 #| e.g. File::Spec.os('Win32') returns File::Spec::Win32
 method os (Str $OS = $*OS ) {
-	$module = "File::Spec::" ~ (%module{$OS} // 'Unix');
+	my $module = "File::Spec::" ~ (%module{$OS} // 'Unix');
 	require $module;
 	::($module);
 }
