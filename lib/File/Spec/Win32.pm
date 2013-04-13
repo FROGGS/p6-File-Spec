@@ -178,9 +178,8 @@ sub canon-cat ( $first is copy, *@rest ) {
 	if $volume ~~ /^<$driveletter>/ {
 		$volume.=uc;
 	}
-	else {
-		$volume ~~ /<-[\\\/]>$/ and $volume ~= '\\';
-		$volume ~~ /^<[\\\/]>$/ and $volume = '\\'; #::
+	elsif $volume.chars && $volume !~~ / '\\' $/ {
+		$volume ~= '\\';
 	}
 
 	my $path = join "\\", $first, @rest.flat;
@@ -189,7 +188,7 @@ sub canon-cat ( $first is copy, *@rest ) {
 
 	$path ~~ s:g/[ ^ | '\\']   '.'  '\\.'*  [ '\\' | $ ]/\\/;  #:: xx/././yy --> xx/yy
 
-	if $*OS ne "Win32" {
+	if $*OS ne "MSWin32" {
 		#netware or symbian ... -> ../..
 		#unknown if .... or higher is supported
 		$path ~~ s:g/ <?after ^ | '\\'> '...' <?before '\\' | $ > /..\\../; #::
