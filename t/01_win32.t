@@ -72,7 +72,7 @@ my @catdir =
 	('A:/').item,                   'A:\\',
 	('\\', 'foo').item,             '\\foo',
 	('','','..').item,              '\\',
-	('A:', 'foo').item,             'A:\\foo';
+	('A:', 'foo').item,             'A:foo';
 for @catdir -> $in, $out {
 	is $win32.catdir(|$in), $out, "catdir: {$in.perl} -> '$out'";
 }
@@ -204,7 +204,7 @@ my @catfile =
 	('c').item,                'c',
 	('.\\c').item,              'c',
 	('a/..','../b').item,       'a\\..\\..\\b',
-	('A:', 'foo').item,         'A:\\foo';
+	('A:', 'foo').item,         'A:foo';
 
 for @catfile -> $in, $out {
 	is $win32.catfile(|$in), $out, "catfile: {$in.perl} -> '$out'"
