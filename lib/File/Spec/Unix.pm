@@ -13,21 +13,12 @@ method canonpath( $path is copy ) {
                || $path ~~ s {^ ( '//' <-[ / ]>+ ) '/' }   = '/' )
 	           { $node = ~ $0; }
 
-	# xx////xx  -> xx/xx
-	$path ~~ s:g { '/'+ }              = '/';
-
-	# xx/././xx -> xx/xx
-	$path ~~ s:g { '/.'+ ['/' | $] }   = '/';     #:
-
-	# ./xx      -> xx
-	$path ~~ s { ^ './' <!before $> }  = '';   #=
-
-	# /../..(/xx) -> /(xx)
-	$path ~~ s { ^ '/..'+ ['/' | $] }  = '/';   
-
-	# xx/       -> xx
+	$path ~~ s:g { '/'+ }              = '/';     # xx////xx  -> xx/xx  
+	$path ~~ s:g { '/.'+ ['/' | $] }   = '/';     # xx/././xx -> xx/xx  
+	$path ~~ s { ^ './' <!before $> }  = '';      # ./xx      -> xx
+	$path ~~ s { ^ '/..'+ ['/' | $] }  = '/';     # /../..(/xx) -> /(xx)
 	unless $path eq "/" {
-		$path ~~ s { '/' $ }       = '';
+		$path ~~ s { '/' $ }       = '';      # xx/       -> xx    :)
 	}
 
 	return "$node$path";
