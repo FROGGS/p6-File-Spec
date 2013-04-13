@@ -8,37 +8,17 @@ method canonpath( $path is copy ) {
 	# may be interpreted in an implementation-defined manner, although
 	# more than two leading slashes shall be treated as a single slash.")
 	my $node = '';
-	my $double_slashes_special = $*OS eq 'qnx' || $*OS eq 'nto';
+	if BEGIN { so $*OS eq 'qnx'|'nto' }   #double slashes special on these OSes
+	   && (   $path ~~ s {^ ( '//' <-[ / ]>+ ) '/'? $} = ''
+               || $path ~~ s {^ ( '//' <-[ / ]>+ ) '/' }   = '/' )
+	           { $node = ~ $0; }
 
-
-	if $double_slashes_special
-	&& ( $path ~~ s {^ ( '//' <-[ '/' ]>+ ) '/'? $} = '' || $path ~~ s { ^ ( '//' <-[ '/' ]>+ ) '/' } = '/' ) {
-		$node = $0;
-	}
-
-	# xx////xx  -> xx/xx
-	$path ~~ s:g { '/'+ }       = '/';
-
-	# xx/././xx -> xx/xx
-	$path ~~ s:g { '/.'+ '/' }  = '/';
-
-	# xx/././xx -> xx/xx
-	$path ~~ s:g { '/.'+ $ }    = '/';
-
-	# ./xx      -> xx
-	unless $path eq "./" {
-		$path ~~ s { ^ './'+ }  = '';
-	}
-
-	# /../../xx -> xx
-	$path ~~ s { ^ '/' '../'+ } = '/';
-
-	# /..       -> /
-	$path ~~ s { ^ '/..' $ }    = '/';
-
-	# xx/       -> xx
+	$path ~~ s:g { '/'+ }              = '/';     # xx////xx  -> xx/xx  
+	$path ~~ s:g { '/.'+ ['/' | $] }   = '/';     # xx/././xx -> xx/xx  
+	$path ~~ s { ^ './' <!before $> }  = '';      # ./xx      -> xx
+	$path ~~ s { ^ '/..'+ ['/' | $] }  = '/';     # /../..(/xx) -> /(xx)
 	unless $path eq "/" {
-		$path ~~ s { '/' $ }    = '';
+		$path ~~ s { '/' $ }       = '';      # xx/       -> xx    :)
 	}
 
 	return "$node$path";
@@ -85,7 +65,7 @@ method path {
 }
 
 method splitpath( $path, $nofile = False ) {
-	my ( $volume, $directory, $file ) = ( '', '', '' );
+	my ( $directory, $file ) = ( '', '' );
 
 	if $nofile {
 		$directory = $path;
@@ -96,23 +76,22 @@ method splitpath( $path, $nofile = False ) {
 		$file      = ~$1;
 	}
 
-	return ( $volume, $directory, $file );
+	return ( '', $directory, $file );
 }
 
 method split (Mu:D $path is copy ) {
-	my ( $volume, $directory, $file ) = ( '', '', '' );
+	$path  ~~ s/<?after .> '/'+ $ //;
 
-	$path      ~~ s/<?after .> '/'+ $ //;
-	$path      ~~ m/^ ( [ .* \/ ]? ) (<-[\/]>*) /;
-	$directory = ~$0;
-	$file      = ~$1;
+	$path  ~~ m/^ ( [ .* \/ ]? ) (<-[\/]>*) /;
+	my ($directory, $file) = ~$0, ~$1;
+
 	$directory ~~ s/<?after .> '/'+ $ //; #/
 
 	$file = '/'      if $directory eq '/' && $file eq '';
 	$directory = '.' if $directory eq ''  && $file ne '';
 	    # shell dirname '' produces '.', but we don't because it's probably user error
 
-	return ( $volume, $directory, $file );
+	return ( '', $directory, $file );
 }
 
 
@@ -137,24 +116,11 @@ method catpath( $volume, $directory is copy, $file ) {
 }
 
 method catdir( *@parts ) { self.canonpath( (@parts, '').join('/') ) }
-
-method splitdir( $path ) {
-	return $path.split( /\// )
-}
-
-method catfile( *@parts is copy ) {
-	my $file = self.canonpath( @parts.pop );
-	return $file unless @parts.elems;
-	my $dir  = self.catdir( @parts );
-	$dir    ~= '/' unless $dir.substr(*-1) eq '/';
-	return $dir ~ $file;
-}
+method splitdir( $path ) { $path.split( /\// )  }
+method catfile( |c )     { self.catdir(|c) }
 
 method abs2rel( $path is copy, $base is copy = Str ) {
 	$base = $*CWD unless $base.defined && $base.chars;
-
-	$path = self.canonpath( $path );
-	$base = self.canonpath( $base );
 
 	if self.file-name-is-absolute($path) || self.file-name-is-absolute($base) {
 		$path = self.rel2abs( $path );
@@ -162,8 +128,8 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 	}
 	else {
 		# save a couple of cwd()s if both paths are relative
-		$path = self.catdir( '/', $path );
-		$base = self.catdir( '/', $base );
+		$path = self.catdir( self.rootdir, $path );
+		$base = self.catdir( self.rootdir, $base );
 	}
 
 	my ($path_volume, $path_directories) = self.splitpath( $path, 1 );
@@ -200,25 +166,12 @@ method abs2rel( $path is copy, $base is copy = Str ) {
 	return self.canonpath( self.catpath('', $result_dirs, '') );
 }
 
-method rel2abs( $path is copy, $base is copy = Str ) {
-	# Clean up $path
-	if !self.file-name-is-absolute( $path ) {
-		# Figure out the effective $base and clean it up.
-		if !$base.defined || $base eq '' {
-			$base = $*CWD;
-		}
-		elsif !self.file-name-is-absolute( $base ) {
-			$base = self.rel2abs( $base )
-		}
-		else {
-			$base = self.canonpath( $base )
-		}
-
-		# Glom them together
-		$path = self.catdir( $base, $path )
+method rel2abs( $path, $base is copy = $*CWD) {
+	return self.canonpath($path) if self.file-name-is-absolute($path);
+	if !self.file-name-is-absolute( $base ) {
+		$base = self.rel2abs( $base )
 	}
-
-	return self.canonpath( $path )
+	self.catdir( $base, $path );
 }
 
 method case-tolerant (Str:D $path = $*CWD, $write_ok as Bool = True ) {
