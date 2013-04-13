@@ -28,7 +28,7 @@ method curdir {	'.'  }
 method updir  { '..' }
 method rootdir { '/' }
 method devnull { '/dev/null' }
-method default-case-tolerant { $*OS eq 'darwin' }
+method default-case-tolerant { so $*OS eq 'darwin'|'epoc' }
 
 method _firsttmpdir( *@dirlist ) {
 	my $tmpdir = @dirlist.first: { .defined && .IO.d && .IO.w }
