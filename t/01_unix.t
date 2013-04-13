@@ -165,7 +165,7 @@ if $*OS ~~ any(<MacOS MSWin32 os2 VMS epoc NetWare symbian dos cygwin>) {
 else {
 	is File::Spec.MODULE, "File::Spec::Unix", "unix: loads correct module";
 	is File::Spec.rel2abs( File::Spec.curdir ), $*CWD, "rel2abs: \$*CWD test";
-	ok File::Spec.tmpdir.IO.d && File::Spec.tmpdir.IO.w, "tmpdir: {File::Spec.tmpdir} is a writable directory";
+	ok {.IO.d && .IO.w}.(File::Spec.tmpdir), "tmpdir: {File::Spec.tmpdir} is a writable directory";
 	#case-tolerant
 	if (cwd.IO ~~ :w) {
 		"casetol.tmp".IO.e or spurt "casetol.tmp", "temporary test file, delete after reading";

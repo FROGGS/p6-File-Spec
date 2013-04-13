@@ -70,6 +70,11 @@ method split ($path as Str is copy) {
 	my ($volume, $directory, $file) = (~$0, ~$1, ~$2);
         $directory ~~ s/ <?after .> <$slash>+ $//;
 
+
+	if all($directory, $file) eq '' && $volume ne '' {
+		$directory = $volume ~~ /^<$driveletter>/
+		             ?? '.' !! '\\';
+	}
 	$file = '\\'      if $directory eq any('/', '\\') && $file eq '';
 	$directory = '.'  if $directory eq ''             && $file ne '';
 

@@ -154,6 +154,7 @@ my @split =
 	'C:../d2\\d3/file',                'C:,../d2\\d3,file',
 	'\\../..\\d1/',                    ',\\../..,d1',
 	'\\./.\\d1/',                      ',\\./.,d1',
+	'//unc/share',                     '//unc/share,\\,\\',
 	'\\\\node\\share\\d1/d2\\d3/',     '\\\\node\\share,\\d1/d2,d3',
 	'\\\\node\\share\\d1/d2\\d3/file', '\\\\node\\share,\\d1/d2\\d3,file',
 	'\\\\node\\share\\d1/d2\\file',    '\\\\node\\share,\\d1/d2,file',
