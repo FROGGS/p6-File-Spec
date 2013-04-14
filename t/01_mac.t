@@ -34,7 +34,9 @@ my @splitpath_test =
 	'hd:file',        'hd:,,file';
 
 say "# Test splitpath";
-for @splitpath_test -> $get, $want { is $Mac.splitpath(|$get).join(','), $want };
+for @splitpath_test -> $get, $want {
+	is $Mac.splitpath(|$get).join(','), $want, "splitpath: {$get.perl} -> '$want'";
+}
 
 
 if $*OS !~~ 'MacOS' {
@@ -49,19 +51,16 @@ else {
 	#rootdir
 	#tmpdir
 	is File::Spec.updir,   '::',       'updir is "::"';
-	#no-upwards
-
-	is File::Spec.case-tolerant, True, 'case-tolerant is True';
-	is File::Spec.default-case-tolerant, True, 'default-case-tolerant is True';
+	#no-parent-or-current-test
 
 	#file-name-is-absolute
 	#path
 	#join
-	is File::Spec.splitpath('hd:file'), 'hd:,,file';
+	#split
 	#splitdir
 	#catpath
 	#abs2rel
-	#rel2ab
+	#rel2abs
 }
 
 done;

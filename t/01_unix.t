@@ -4,7 +4,7 @@ use Test;
 use File::Spec;
 use File::Spec::Unix;
 
-plan 107;
+plan 109;
 
 my $Unix := File::Spec::Unix;
 
@@ -44,16 +44,18 @@ is $Unix.devnull, '/dev/null', 'devnull is /dev/null';
 is $Unix.rootdir, '/',         'rootdir is "/"';
 
 is $Unix.updir,   '..',        'updir is ".."';
-my @get  = <. .. .git blib lib t>;
-my @want = <.git blib lib t>;
-is_deeply $Unix.no-upwards( @get ), @want, 'no-upwards: (. .. .git blib lib t) -> (.git blib lib t)';
+
+isnt '.',    $Unix.no-parent-or-current-test,   "no-parent-or-current-test: '.'";
+isnt '..',   $Unix.no-parent-or-current-test,   "no-parent-or-current-test: '..'";
+is   '.git', $Unix.no-parent-or-current-test,   "no-parent-or-current-test: '.git'";
+is   'file', $Unix.no-parent-or-current-test,   "no-parent-or-current-test: 'file'";
 
 ok  $Unix.file-name-is-absolute( '/abcd' ), 'file-name-is-absolute: ok "/abcd"';
 nok $Unix.file-name-is-absolute( 'abcd' ),  'file-name-is-absolute: nok "abcd"';
 
 my $path = %*ENV{'PATH'};
 %*ENV{'PATH'} = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:';
-@want         = </usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin /usr/games .>;
+my @want         = </usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin /usr/games .>;
 is_deeply $Unix.path, @want, 'path';
 %*ENV{'PATH'} = $path;
 
@@ -166,14 +168,6 @@ else {
 	is File::Spec.MODULE, "File::Spec::Unix", "unix: loads correct module";
 	is File::Spec.rel2abs( File::Spec.curdir ), $*CWD, "rel2abs: \$*CWD test";
 	ok {.IO.d && .IO.w}.(File::Spec.tmpdir), "tmpdir: {File::Spec.tmpdir} is a writable directory";
-	#case-tolerant
-	if (cwd.IO ~~ :w) {
-		"casetol.tmp".IO.e or spurt "casetol.tmp", "temporary test file, delete after reading";
-		is $Unix.case-tolerant("casetol.tmp"), so "CASETOL.TMP".IO.e, "case-tolerant is {so "CASETOL.TMP".IO.e} in cwd";
-		unlink "casetol.tmp";
-	}
-	else { skip "case-tolerant, no write access in cwd", 1; } 
-
 }
 
 done;
