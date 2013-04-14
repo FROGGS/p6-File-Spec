@@ -263,7 +263,6 @@ is $win32.curdir,  '.',   'curdir is "."';
 is $win32.devnull, 'nul', 'devnull is nul';
 is $win32.rootdir, '\\',  'rootdir is "\\"';
 is $win32.updir,   '..',  'updir is ".."';
-is $win32.default-case-tolerant, True, 'default-case-tolerant is True';
 
 
 if $*OS !~~ any(<MSWin32 NetWare symbian>) {
@@ -273,12 +272,7 @@ else {
 	# double check a couple of things to see if File::Spec loaded correctly
 	is File::Spec.devnull, 'nul', 'devnull is nul';
 	is File::Spec.rootdir, '\\',  'rootdir is "\\"';
-	#tmpdir
-	#no-upwards
-	is File::Spec.case-tolerant, 1, 'case-tolerant is 1';
-
-	#join
-
+	ok {.IO.d && .IO.w}.(File::Spec.tmpdir), "tmpdir: {File::Spec.tmpdir} is a writable directory";
 }
 
 done;

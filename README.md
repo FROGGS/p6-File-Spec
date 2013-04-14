@@ -28,7 +28,6 @@ Methods (current state):
 	catfile                   done         done        done
 	abs2rel                   done         done        done
 	rel2abs                   done         done        done
-	case-tolerant             done  done   done  done  done
 
 '~~' means partially implemented, but not passing tests.
 
@@ -40,26 +39,13 @@ See [Perl 5 File::Spec](http://search.cpan.org/~smueller/PathTools-3.40/lib/File
 
 Method `no_updirs` is gone, because its use case is handled automatically by `dir()`.  For the test that supplies dir with its functionality, see new method `no-parent-or-current-test`.
 
+Method `case_tolerant` has moved to its own module, [File::Spec::Case](https://github.com/labster/p6-File-Spec-Case), and slightly changed its interface.
+
 ## Changed methods
 
 ### join
 
 The method `join` is no longer an alias for `catfile`, but instead a unique function similar to `catpath`.  See the description of join in the New methods section.
-
-### case_tolerant
-Method `case_tolerant` now requires a path (default $*CWD), below which it tests for case sensitivity.  A :no-write parameter may be passed if you want to disable writing of test files (which is tried last).
-
-	File::Spec.case_tolerant('foo/bar');
-	File::Spec.case_tolerant('/etc', :no-write);
-
-It will find case (in)sensitivity if any of the following are true, in increasing order of desperation:
-
-* The $path passed contains \<alpha\> and no symbolic links.
-* The $path contains \<alpha\> after the last symlink.
-* Any folders in the path (under the last symlink, if applicable) contain a file matching \<alpha\>.
-* Any folders in the path (under the last symlink, if applicable) are writable.
-
-Otherwise, it returns the platform default.
 
 ## New methods
 
@@ -122,7 +108,7 @@ This method is the inverse of `.split`; the results can be passed to it to get t
 
 ### no-parent-or-current-test
 
-Returns a test as to whether a given path is identical to the parent or the current directory.  This is used automatically by `dir()` for directory listings, so under normal circumstances you shouldn't need to use it directly.
+Returns a test as to whether a given path is identical to the parent or the current directory.  The `dir()` function automatically removes these for you in directory listings, so under normal circumstances you shouldn't need to use it directly.
 
 	'file' ~~ File::Spec.no-parent-or-current-test    #False
 	'.'    ~~ File::Spec.no-parent-or-current-test    #True
@@ -135,4 +121,4 @@ This can, however, be used to extend `dir()` through its `$test` parameter:
 
 This example would return all files begining with a period that are not `.` or `..` directories.
 
-This replaces the functionality the old `no-updirs` method.
+This replaces the functionality of the old `no-updirs` method.

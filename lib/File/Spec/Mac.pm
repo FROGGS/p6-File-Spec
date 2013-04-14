@@ -20,7 +20,6 @@ method tmpdir {
 
 method updir                 { '::'                                }
 method no-parent-or-current-test  { ::($module).no-parent-or-current-test }
-method case-tolerant         { 1                                   }
 method file-name-is-absolute ($path) {
 	do given $path {
 		when  m/':'/	{ ! ($path ~~ /^':'/) }

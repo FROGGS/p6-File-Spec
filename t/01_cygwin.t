@@ -4,7 +4,7 @@ use Test;
 use File::Spec;
 use File::Spec::Cygwin;
 
-plan 104;
+plan 102;
 my $cygwin = File::Spec::Cygwin;
 
 say "# File::Spec::Cygwin";
@@ -166,7 +166,6 @@ is $cygwin.curdir,  '.',   'curdir is "."';
 is $cygwin.devnull, '/dev/null', 'devnull is /dev/null';
 is $cygwin.rootdir, '/',  'rootdir is "\\"';
 is $cygwin.updir,   '..',  'updir is ".."';
-is $cygwin.default-case-tolerant, True, 'default-case-tolerant is True';
 
 
 if $*OS !~~ any(<cygwin>) {
@@ -176,7 +175,6 @@ else {
 	# double check a couple of things to see if File::Spec loaded correctly
 	is File::Spec.rootdir, '\\',  'File::Spec loads Cygwin';
 	ok {.IO.d && .IO.w}.(File::Spec.tmpdir), "tmpdir: {File::Spec.tmpdir} is a writable directory";
-	is File::Spec.case-tolerant, True, 'case-tolerant is True';
 }
 
 done;
