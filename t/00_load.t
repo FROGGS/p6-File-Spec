@@ -3,14 +3,13 @@ use Test;
 use lib 'lib';
 use File::Spec;
 
-plan 27;
+plan 25;
 
 eval_lives_ok 'use File::Spec', 'we can use File::Spec';
 ok $*OS,                        "your operating system is $*OS";
 _can_ok $_ for <canonpath catdir catfile curdir devnull rootdir tmpdir
-                updir no-upwards case-tolerant default-case-tolerant
-                file-name-is-absolute path splitpath splitdir catpath
-                split join abs2rel rel2abs os>;
+                updir no-parent-or-current-test file-name-is-absolute
+                path splitpath splitdir catpath split join abs2rel rel2abs os>;
 
 sub _can_ok( $method ) {
 	ok File::Spec.^methods.first( $method ), "we can call File::Spec.$method"

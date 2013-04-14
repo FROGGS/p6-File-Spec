@@ -33,8 +33,7 @@ method devnull                              { ::($module).devnull()             
 method rootdir                              { ::($module).rootdir()                            }
 method tmpdir                               { ::($module).tmpdir()                             }
 method updir                                { ::($module).updir()                              }
-method no-upwards( *@paths )                { ::($module).no_upwards( @paths )                 }
-method default-case-tolerant                { ::($module).default-case-tolerant()              }
+method no-parent-or-current-test            { ::($module).no-parent-or-current-test            }
 method file-name-is-absolute( $file )       { ::($module).file-name-is-absolute( $file )       }
 method path                                 { ::($module).path()                               }
 method splitpath( $path, $no_file = False ) { ::($module).splitpath( $path, $no_file )         }
@@ -42,7 +41,6 @@ method splitdir( $path )                    { ::($module).splitdir( $path )     
 method catpath( $volume, $directory, $file) { ::($module).catpath( $volume, $directory, $file) }
 method abs2rel( |c )                        { ::($module).abs2rel( |c )                        }
 method rel2abs( |c )                        { ::($module).rel2abs( |c )                        }
-method case-tolerant( $path = $*CWD )       { ::($module).case-tolerant( $path )               }
 
 method split ( $path )                       { ::($module).split( $path )                      }
 method join ( $volume, $directory, $file )   { ::($module).join( $volume, $directory, $file )  }

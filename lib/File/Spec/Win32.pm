@@ -46,8 +46,6 @@ method path {
 	return @path;
 }
 
-method default-case-tolerant  { True        }
-
 method file-name-is-absolute ($path) {
 	# As of right now, this returns 2 if the path is absolute with a
 	# volume, 1 if it's absolute with no volume, 0 otherwise.

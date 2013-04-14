@@ -48,4 +48,3 @@ method splitpath (|c)         { File::Spec::Win32.splitpath(|c) }
 method catpath (|c)           { File::Spec::Win32.catpath(|c).subst(:global, '\\', '/')  }
 method split ($path)          { File::Spec::Win32.split($path)».subst(:global, '\\', '/')}
 method join (|c)              { File::Spec::Win32.join(|c).subst(:global, '\\', '/')     }
-method default-case-tolerant  { True                                }
