@@ -8,7 +8,7 @@ method canonpath( $path is copy ) {
 	# may be interpreted in an implementation-defined manner, although
 	# more than two leading slashes shall be treated as a single slash.")
 	my $node = '';
-	if BEGIN { so $*OS eq 'qnx'|'nto' }   #double slashes special on these OSes
+	if ( BEGIN { so $*OS eq 'qnx'|'nto' } )   #double slashes special on these OSes
 	   && (   $path ~~ s {^ ( '//' <-[ / ]>+ ) '/'? $} = ''
                || $path ~~ s {^ ( '//' <-[ / ]>+ ) '/' }   = '/' )
 	           { $node = ~ $0; }
@@ -30,7 +30,7 @@ method rootdir { '/' }
 method devnull { '/dev/null' }
 
 method _firsttmpdir( *@dirlist ) {
-	my $tmpdir = @dirlist.first: { .defined && .IO.d && .IO.w }
+	my $tmpdir = @dirlist.first( { .defined && .IO.d && .IO.w } )
 		or fail "No viable candidates for a temporary directory found";
 	self.canonpath( $tmpdir );
 }
