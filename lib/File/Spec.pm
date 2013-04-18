@@ -11,7 +11,7 @@ my %module = (
 );
 
 $module = "File::Spec::" ~ (%module{$*OS} // 'Unix');
-require $module;
+require ::($module);
 
 #| MODULE - for module introspection
 method MODULE                            { $module; }  # for introspection
@@ -20,7 +20,7 @@ method MODULE                            { $module; }  # for introspection
 #| e.g. File::Spec.os('Win32') returns File::Spec::Win32
 method os (Str $OS = $*OS ) {
 	my $module = "File::Spec::" ~ (%module{$OS} // 'Unix');
-	require $module;
+	require ::($module);
 	::($module);
 }
 
