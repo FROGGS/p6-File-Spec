@@ -1,6 +1,10 @@
 p6-File-Spec
 ============
 
+## Note
+
+This module is obsolete since IO::Spec is implemented in rakudo.
+
 Usage:
 
 	use File::Spec;
