@@ -3,5 +3,13 @@
     "version" : "*",
     "description" : "portably perform operations on file names",
     "depends" : [ ],
-    "source-url" : "git://github.com/FROGGS/p6-File-Spec.git"
+    "source-url" : "git://github.com/FROGGS/p6-File-Spec.git",
+    "provides" : {
+        "File::Spec" : "lib/File/Spec.pm",
+        "File::Spec::Cygwin" : "lib/File/Spec/Cygwin.pm",
+        "File::Spec::Mac" : "lib/File/Spec/Mac.pm",
+        "File::Spec::Unix" : "lib/File/Spec/Unix.pm",
+        "File::Spec::VMS" : "lib/File/Spec/VMS.pm",
+        "File::Spec::Win32" : "lib/File/Spec/Win32.pm"
+    }
 }
